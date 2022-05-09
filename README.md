@@ -1,32 +1,10 @@
-# Robot template
+# Cannonbot
 
 ---
-## Getting Started
-
-- Create a new, blank, uninitialized repository
-  - The git URL will be identified as `<target repo>`
-  - It's name will be identified as `<target dir>`
-- Clone the repository
-  - Either using terminal/cmd commands
-    - ```shell
-      git clone --recurse-submodules https://github.com/kettlemorainerc/robot-template.git <target dir>
-      cd <target dir> 
-      ```
-  - Or using IntelliJ's built-in repository cloning
-    - `File > New > Project from Version Control...`
-    - Set the URL to `https://github.com/kettlemorainerc/robot-template.git`
-    - Click "Clone"
-- Make sure submodules have been initialized
-  - in a terminal do
-    - ```shell
-      git submodule update --recursive --init
-      ```
-    - you can find IntelliJ's built-in terminal near the lower-left corner by default
-- Modify the remote URL of the local repository
-  - In a terminal you can do
-    - ```shell
-      git remote set-url origin https://github.com/kettlemorainerc/<taget repo>
-      ```
-  - In IntelliJ 
-    - go to `Git > Manage Remotes`
-    - Update the "origin" option to `<target repo>`
+## What is Cannnonbot?
+  Cannonbot is a testing and demo bot that shoots t-shirts for events, right now we are on Cannonbot3.0 which is using a roboRIO instead of the previous cRIO in order to make it more compatable with the rest of the robots on the team.
+  
+## What is in this verison of Cannonbot?
+  - roboRIO
+  - Numatics
+  - Swerve drive
