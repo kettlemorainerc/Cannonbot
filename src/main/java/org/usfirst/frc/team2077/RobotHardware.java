@@ -16,6 +16,13 @@ public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS
     private final CHASSIS_TYPE chassis;
     private final Map<WheelPosition, DRIVE_MODULE> wheels = new EnumMap<>(WheelPosition.class);
 
+
+    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
+    public final CANLineSubsystem.SwerveModule NORTH_EAST_MODULE = new CANLineSubsystem.SwerveModule(SparkNeoDriveModule.DrivePosition.NORTH_EAST_SWERVE_MODULE);
+
+
+
+
     public RobotHardware() {
         super();
 
