@@ -10,6 +10,13 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     private final Subsystem POSITION = new Subsystem() {};
     private final AbstractChassis CHASSIS;
 
+
+    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
+    public final CANLineSubsystem.SwerveModule NORTH_EAST_MODULE = new CANLineSubsystem.SwerveModule(SparkNeoDriveModule.DrivePosition.NORTH_EAST_SWERVE_MODULE);
+
+
+
+
     public RobotHardware() {
         CHASSIS = new MecanumChassis(this);
     }
