@@ -14,7 +14,10 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
     public final CANLineSubsystem.SwerveModule NORTH_EAST_MODULE = new CANLineSubsystem.SwerveModule(SparkNeoDriveModule.DrivePosition.NORTH_EAST_SWERVE_MODULE);
 
-
+    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
+        //TODO: Place stuff here
+        return null;
+    }
 
 
     public RobotHardware() {
