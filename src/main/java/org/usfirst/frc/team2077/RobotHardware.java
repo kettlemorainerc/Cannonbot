@@ -27,13 +27,8 @@ public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS
 
 
     public RobotHardware() {
-        super();
-
-        for(WheelPosition p : WheelPosition.values()) {
-            wheels.put(p, makeWheel(p));
-        }
-
-        chassis = new ChassisType(this);
+//        CHASSIS = new MecanumChassis(this);
+        CHASSIS = new SwerveChassis(this);
     }
 
     private DRIVE_MODULE makeWheel(WheelPosition position) {
