@@ -21,7 +21,8 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 
     public RobotHardware() {
-        CHASSIS = new MecanumChassis(this);
+//        CHASSIS = new MecanumChassis(this);
+        CHASSIS = new SwerveChassis(this);
     }
 
     @Override public Subsystem getHeading() {
