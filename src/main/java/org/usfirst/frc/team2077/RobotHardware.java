@@ -39,7 +39,7 @@ public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS
 //        northWest.setPID(deadAngle, Pvalue, Ivalue, Dvalue);
 
 
-    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
+//    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
 
     public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
         //TODO: Place stuff here
