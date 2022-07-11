@@ -33,7 +33,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 //        northWest.setPID(deadAngle, Pvalue, Ivalue, Dvalue);
 
 
-    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
+//    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
 
     public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
         //TODO: Place stuff here
