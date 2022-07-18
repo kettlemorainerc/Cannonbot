@@ -1,20 +1,24 @@
 package org.usfirst.frc.team2077;
 
 import com.kauailabs.navx.frc.*;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.common.subsystems.*;
+import org.usfirst.frc.team2077.subsystem.*;
 
 public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SparkNeoDriveModule> {
     private final Subsystem HEADING = new Subsystem() {};
     private final Subsystem POSITION = new Subsystem() {};
-    private final AbstractChassis CHASSIS;
+//    private final AbstractChassis CHASSIS;
+
+    public final Cannon CANNON;
 
 
-    public final RotationMotor northEast = new RotationMotor(RotationMotor.MotorPosition.FRONT_RIGHT);
-    public final RotationMotor northWest = new RotationMotor(RotationMotor.MotorPosition.FRONT_LEFT);
-    public final RotationMotor southEast = new RotationMotor(RotationMotor.MotorPosition.BACK_RIGHT);
-    public final RotationMotor southWest = new RotationMotor(RotationMotor.MotorPosition.BACK_LEFT);
+//    public final RotationMotor northEast = new RotationMotor(RotationMotor.MotorPosition.FRONT_RIGHT);
+//    public final RotationMotor northWest = new RotationMotor(RotationMotor.MotorPosition.FRONT_LEFT);
+//    public final RotationMotor southEast = new RotationMotor(RotationMotor.MotorPosition.BACK_RIGHT);
+//    public final RotationMotor southWest = new RotationMotor(RotationMotor.MotorPosition.BACK_LEFT);
 
 
     public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
@@ -35,15 +39,20 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 //    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
 
-    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
-        //TODO: Place stuff here
-        return null;
-    }
+//    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
+//        //TODO: Place stuff here
+//        return null;
+//    }
 
 
     public RobotHardware() {
 //        CHASSIS = new MecanumChassis(this);
-        CHASSIS = new SwerveChassis(this);
+//        CHASSIS = new SwerveChassis(this);
+
+        DigitalOutput loadValve = new DigitalOutput(0);
+        Relay launchValve = new Relay(1);
+        PressureSensor pressure = new PressureSensor(2);
+        CANNON = new Cannon(loadValve, launchValve, pressure);
     }
 
     @Override public Subsystem getHeading() {
@@ -55,7 +64,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     }
 
     @Override public AbstractChassis getChassis() {
-        return CHASSIS;
+        return null;
     }
 
     @Override public AHRS getNavX() {
