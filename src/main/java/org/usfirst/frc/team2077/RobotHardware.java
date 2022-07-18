@@ -1,26 +1,24 @@
 package org.usfirst.frc.team2077;
 
-import org.usfirst.frc.team2077.common.*;
+import com.kauailabs.navx.frc.*;
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj2.command.*;
+import org.usfirst.frc.team2077.common.drivetrain.*;
+import org.usfirst.frc.team2077.common.subsystems.*;
+import org.usfirst.frc.team2077.subsystem.*;
 
-import java.util.EnumMap;
-/*
-You should replace "DRIVE_MODULE" with the type of modules your chassis uses.
-Ex. SparkNeoDriveModule, SwerveModule, etc.
-and replace "CHASSIS_TYPE" with the type of chassis you're using MecanumChassis, SwerveChassis, etc.
-*/
+public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SparkNeoDriveModule> {
+    private final Subsystem HEADING = new Subsystem() {};
+    private final Subsystem POSITION = new Subsystem() {};
+//    private final AbstractChassis CHASSIS;
 
-/**
- * This is intended to be a spot for the definition and retrieval of all robot hardware.
- * */
-public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS_TYPE> {
-    private final CHASSIS_TYPE chassis;
-    private final Map<WheelPosition, DRIVE_MODULE> wheels = new EnumMap<>(WheelPosition.class);
+    public final Cannon CANNON;
 
 
-    public final RotationMotor northEast = new RotationMotor(RotationMotor.MotorPosition.FRONT_RIGHT);
-    public final RotationMotor northWest = new RotationMotor(RotationMotor.MotorPosition.FRONT_LEFT);
-    public final RotationMotor southEast = new RotationMotor(RotationMotor.MotorPosition.BACK_RIGHT);
-    public final RotationMotor southWest = new RotationMotor(RotationMotor.MotorPosition.BACK_LEFT);
+//    public final RotationMotor northEast = new RotationMotor(RotationMotor.MotorPosition.FRONT_RIGHT);
+//    public final RotationMotor northWest = new RotationMotor(RotationMotor.MotorPosition.FRONT_LEFT);
+//    public final RotationMotor southEast = new RotationMotor(RotationMotor.MotorPosition.BACK_RIGHT);
+//    public final RotationMotor southWest = new RotationMotor(RotationMotor.MotorPosition.BACK_LEFT);
 
 
     public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
@@ -41,15 +39,20 @@ public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS
 
 //    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
 
-    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
-        //TODO: Place stuff here
-        return null;
-    }
+//    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
+//        //TODO: Place stuff here
+//        return null;
+//    }
 
 
     public RobotHardware() {
 //        CHASSIS = new MecanumChassis(this);
-        CHASSIS = new SwerveChassis(this);
+//        CHASSIS = new SwerveChassis(this);
+
+        DigitalOutput loadValve = new DigitalOutput(0);
+        Relay launchValve = new Relay(1);
+        PressureSensor pressure = new PressureSensor(2);
+        CANNON = new Cannon(loadValve, launchValve, pressure);
     }
 
     private DRIVE_MODULE makeWheel(WheelPosition position) {
@@ -66,7 +69,15 @@ public class RobotHardware implements HardwareRequirements<DRIVE_MODULE, CHASSIS
         return chassis;
     }
 
-    @Override public DRIVE_MODULE getWheel(WheelPosition pos) {
-        return wheels.get(pos);
+    @Override public AbstractChassis getChassis() {
+        return null;
+    }
+
+    @Override public AHRS getNavX() {
+        return null;
+    }
+
+    @Override public CANLineSubsystem<SparkNeoDriveModule> getWheel(MecanumMath.WheelPosition position) {
+        return null;
     }
 }
