@@ -7,11 +7,11 @@ import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 
 public class RemoveMeCommand extends RepeatedCommand {
 
-    private final SwerveModule motor1;
+    private SwerveModule motor1;
 
     public RemoveMeCommand(RobotHardware hardware) {
 //    public RemoveMeCommand() {
-        motor1 = (hardware.getRotationModule(MecanumMath.WheelPosition.NORTH_EAST));
+//        motor1 = (hardware.getRotationModule(MecanumMath.WheelPosition.NORTH_EAST));
     }
 
     @Override

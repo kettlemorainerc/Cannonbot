@@ -52,7 +52,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 
     public RobotHardware() {
-        CHASSIS = new MecanumChassis(this);
+        CHASSIS = null; // new MecanumChassis(this);
 //        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new SwerveChassis(this);
 
@@ -60,6 +60,11 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
         Relay launchValve = new Relay(1);
         PressureSensor pressure = new PressureSensor(2);
         CANNON = new Cannon(loadValve, launchValve, pressure);
+    }
+
+    @Override
+    public Subsystem getHeading() {
+        return HEADING;
     }
 
     @Override
