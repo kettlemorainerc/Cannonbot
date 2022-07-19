@@ -7,6 +7,7 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.button.*;
+import org.usfirst.frc.team2077.command.*;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.commands.*;
 
@@ -49,6 +50,13 @@ public class DriveStation {
      * Bind secondary/techincal driver commands/controls here
      */
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
+        JoystickButton load = new JoystickButton(secondary, 1);
+        JoystickButton stopLoad = new JoystickButton(secondary, 5);
+        JoystickButton launch = new JoystickButton(secondary, 2);
+
+        new LoadLauncher(hardware).bind(load);
+        new StopLoading(hardware).bind(stopLoad);
+        new LaunchCannon(hardware, launch).bind(launch);
     }
 
     /** Normal (brighter/silver) joystick that supports rotation */
