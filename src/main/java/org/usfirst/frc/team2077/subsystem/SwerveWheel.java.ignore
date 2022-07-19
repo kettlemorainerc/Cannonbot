@@ -1,0 +1,135 @@
+package org.usfirst.frc.team2077.common.subsystems;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+
+public abstract class SwerveWheel<D, M extends BaseMotorController> implements Subsystem {
+    public final D directionMotor;
+    public final M magnitudeMotor;
+    public final int directionCanId;
+    public final int magnitudeCanId;
+    public final int encoderChannelA, encoderChannelB;
+
+    private final Encoder encoder;
+
+
+    private static final double countsPerWheelRev = 414;
+
+    private final SpeedController magCtrl;
+    private final SpeedController dirCtrl;
+
+
+    protected double deadAngle = 1.0;
+    protected double PValue = 1.0;
+    protected double IValue = 0.0;
+    protected double DValue = 0.0;
+
+    private double lastError = 0.0;
+    private double errorAccum = 0.0;
+
+    public SwerveWheel(D directionMotor, M magnitudeMotor, int directionCanId, int magnitudeCanId, int encoderChannelA, int encoderChannelB, boolean reverseEncoderDirection){
+        this.directionMotor = directionMotor;
+        this.magnitudeMotor = magnitudeMotor;
+        this.directionCanId = directionCanId;
+        this.magnitudeCanId = magnitudeCanId;
+        this.encoderChannelA = encoderChannelA;
+        this.encoderChannelB = encoderChannelB;
+
+        this.encoder = new Encoder(encoderChannelA, encoderChannelB);
+        this.encoder.reset();
+        this.encoder.setReverseDirection(reverseEncoderDirection);//TODO: Default to true as this is what the original had in it's setting
+    }
+
+    public abstract void setRPM(double RPM);
+    public abstract void setPercent(double percent);
+    public abstract void setDirectionAngle(double RPM);
+    public abstract void setDirectionPercentage(double RPM);//Make it not an angle but just a speed
+    public abstract void setPID(double deadAng, double P, double I, double D);
+
+    public static final class BlueDirTalonMagVictor extends SwerveWheel<TalonSRX, VictorSPX> {
+        private double deadAngle;
+
+        public BlueDirTalonMagVictor(int directionTalonID, int magnitudeVictorId, int encoderChannelA, int encoderChannelB, boolean reverseEncoderDirection) {
+
+            super(new TalonSRX(directionTalonID), new VictorSPX(magnitudeVictorId), directionTalonID, magnitudeVictorId, encoderChannelA, encoderChannelB, reverseEncoderDirection);
+        }
+
+        @Override public void setRPM(double RPM) {
+            throw new UnsupportedOperationException("Talon motors do not support set RPM. Either determine their maximum RPM and update Talon#setRPM, or use Talon#setPercent");
+        }
+
+        @Override public void setPercent(double percent) {
+            magnitudeMotor.set(ControlMode.PercentOutput, percent);
+        }
+
+        @Override
+        public void setDirectionAngle(double angle) {
+
+            double deltaDir = 0.0;
+
+            // Check if the module should be in translation or rotation mode
+            if (Math.abs(rot) > 0.0) {
+                // Rotation mode
+                deltaDir = getWheelDir() - 0;
+            } else {
+                // Translation mode
+                deltaDir = getWheelDir() - dir;
+            }
+
+            // Map the delta onto the same -180 to 180 polar coordinate system
+            // used by the FIRST joystick class.
+            if (deltaDir > 180.0) {
+                deltaDir -= 360.0;
+            } else if (deltaDir < -180.0) {
+                deltaDir += 360.0;
+            }
+
+            // Start PID
+            double error = deltaDir / 180.0;
+            errorAccum += error * dt;
+
+            // Set the direction motor to value specified by PID
+            dirCtrl.set(Pvalue * error + Ivalue * errorAccum + Dvalue * ((error - lastError / dt)));
+
+            // If the remaining error is small enough (small delta angle), then
+            // engage the magnitude motor
+            if (Math.abs(deltaDir) > deadAngle) {
+                magCtrl.set(0.0); // Outside of deadzone
+            } else {
+                // Inside of deadzone
+                if (Math.abs(rot) > 0.0) {
+                    // Rotation mode
+                    magCtrl.set(rot);
+                } else {
+                    // Translation mode
+                    magCtrl.set(mag);
+                }
+            }
+
+            lastError = error;
+
+            //SmartDashboard.putNumber("Delta Dir", deltaDir);
+            //SmartDashboard.putNumber("Delta Time", dt);
+        }
+
+        @Override
+        public void setDirectionPercentage(double percentage) {
+            directionMotor.set(ControlMode.PercentOutput, percentage);
+        }
+
+        @Override
+        public void setPID(double deadAng, double P, double I, double D) {
+            this.deadAngle = deadAng;
+            this.PValue = P;
+            this.IValue = I;
+            this.DValue = D;
+        }
+
+    }
+
+}
