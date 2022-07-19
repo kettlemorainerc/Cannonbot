@@ -33,8 +33,8 @@ public class DriveStation {
     }
 
     public void bind(RobotHardware hardware) {
-        hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
-        hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
+//        hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
+//        hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
