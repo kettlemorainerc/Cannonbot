@@ -17,10 +17,12 @@ public class StopLoading extends SelfDefinedCommand {
     }
 
     @Override public void initialize() {
+        executed = false;
+    }
+
+    @Override public void execute() {
         executed = true;
         cannon.closeLoad();
     }
-
-    @Override public void execute() {}
     @Override public void end(boolean interrupted) {}
 }

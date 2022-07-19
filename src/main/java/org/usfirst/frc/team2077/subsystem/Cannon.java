@@ -7,13 +7,13 @@ import java.util.concurrent.*;
 
 public class Cannon extends SubsystemBase {
     private final Solenoid launchValve;
-    private final DigitalOutput loadValve;
+    private final Solenoid loadValve;
     private final PressureSensor pressure;
 
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> scheduledTask;
 
-    public Cannon(DigitalOutput loadValve, Solenoid launchValve, PressureSensor pressure) {
+    public Cannon(Solenoid loadValve, Solenoid launchValve, PressureSensor pressure) {
         this.launchValve = launchValve;
         this.loadValve = loadValve;
         this.pressure = pressure;
@@ -28,8 +28,6 @@ public class Cannon extends SubsystemBase {
     public void closeLoad() {loadValve.set(false);}
 
     private void openLaunch() {
-        if(isLaunchOpen() && scheduledTask != null) return;
-
         if(isLoadOpen()) {
             closeLoad();
             schedule(() -> launchValve.set(true), 5);
@@ -43,6 +41,7 @@ public class Cannon extends SubsystemBase {
             closeLaunch();
             schedule(() -> loadValve.set(true), 50);
         } else {
+            System.out.println("Opening load valve");
             loadValve.set(true);
         }
     }
