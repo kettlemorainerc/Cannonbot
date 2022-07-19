@@ -4,21 +4,27 @@ import com.kauailabs.navx.frc.*;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.drivetrain.*;
+import org.usfirst.frc.team2077.common.sensors.AngleSensor;
 import org.usfirst.frc.team2077.common.subsystems.*;
 import org.usfirst.frc.team2077.subsystem.*;
+import org.usfirst.frc.team2077.drivetrain.SwerveModule;
+import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SparkNeoDriveModule> {
     private final Subsystem HEADING = new Subsystem() {};
     private final Subsystem POSITION = new Subsystem() {};
-//    private final AbstractChassis CHASSIS;
+    private final AbstractChassis CHASSIS;
 
     public final Cannon CANNON;
+    public static final double WHEELBASE = 20.375; // inches
+    public static final double TRACK_WIDTH = 25.5; // inches
+    public static final double WHEEL_RADIUS = 4.0; // inches
+    public static final double EAST_ADJUSTMENT = .65;
 
-
-//    public final RotationMotor northEast = new RotationMotor(RotationMotor.MotorPosition.FRONT_RIGHT);
-//    public final RotationMotor northWest = new RotationMotor(RotationMotor.MotorPosition.FRONT_LEFT);
-//    public final RotationMotor southEast = new RotationMotor(RotationMotor.MotorPosition.BACK_RIGHT);
-//    public final RotationMotor southWest = new RotationMotor(RotationMotor.MotorPosition.BACK_LEFT);
+    public final SwerveMotor northEast = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_RIGHT);
+    public final SwerveMotor northWest = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_LEFT);
+    public final SwerveMotor southEast = new SwerveMotor(SwerveMotor.MotorPosition.BACK_RIGHT);
+    public final SwerveMotor southWest = new SwerveMotor(SwerveMotor.MotorPosition.BACK_LEFT);
 
 
     public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
@@ -46,6 +52,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 
     public RobotHardware() {
+        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new SwerveChassis(this);
 
@@ -55,29 +62,29 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
         CANNON = new Cannon(loadValve, launchValve, pressure);
     }
 
-    private DRIVE_MODULE makeWheel(WheelPosition position) {
-        switch(position) {
-            case FRONT_LEFT -> new DRIVE_MODULE();
-            case FRONT_RIGHT -> new DRIVE_MODULE();
-            case BACK_LEFT -> new DRIVE_MODULE();
-            case BACK_RIGHT -> new DRIVE_MODULE();
-        }
-        throw new IllegalArgumentException("Unsupported Wheel position: " + position);
-    }
-
-    @Override public CHASSIS_TYPE getChassis() {
-        return chassis;
-    }
-
-    @Override public AbstractChassis getChassis() {
+    @Override
+    public Subsystem getPosition() {
         return null;
     }
 
-    @Override public AHRS getNavX() {
+    @Override
+    public AbstractChassis getChassis() {
+        return CHASSIS;
+    }
+
+    @Override
+    public AngleSensor getAngleSensor() {
         return null;
     }
 
-    @Override public CANLineSubsystem<SparkNeoDriveModule> getWheel(MecanumMath.WheelPosition position) {
+    @Override
+    public AHRS getNavX() {
+        return null;
+    }
+
+    @Override
+    public CANLineSubsystem<SparkNeoDriveModule> getWheel(MecanumMath.WheelPosition position) {
+        // TODO: Utilise the newly created Victor type in CANLineSubsystem
         return null;
     }
 }
