@@ -7,13 +7,13 @@ import java.util.concurrent.*;
 
 public class Cannon extends SubsystemBase {
     private final Solenoid launchValve;
-    private final Solenoid loadValve;
+    private final DigitalOutput loadValve;
     private final PressureSensor pressure;
 
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> scheduledTask;
 
-    public Cannon(Solenoid loadValve, Solenoid launchValve, PressureSensor pressure) {
+    public Cannon(DigitalOutput loadValve, Solenoid launchValve, PressureSensor pressure) {
         this.launchValve = launchValve;
         this.loadValve = loadValve;
         this.pressure = pressure;

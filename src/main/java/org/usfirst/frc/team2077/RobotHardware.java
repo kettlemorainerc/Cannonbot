@@ -56,8 +56,9 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 //        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new SwerveChassis(this);
 
-        Solenoid loadValve = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
-        Solenoid launchValve = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+        // TODO: determine channels
+        DigitalOutput loadValve = new DigitalOutput(0);
+        Solenoid launchValve = new Solenoid(0, PneumaticsModuleType.CTREPCM, 1);
         PressureSensor pressure = new PressureSensor(2);
         CANNON = new Cannon(loadValve, launchValve, pressure);
     }
