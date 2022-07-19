@@ -18,10 +18,12 @@ public class LoadLauncher extends SelfDefinedCommand {
     }
 
     @Override public void initialize() {
+        executed = false;
+    }
+
+    @Override public void execute() {
         cannon.load();
         executed = true;
     }
-
-    @Override public void execute() {}
     @Override public void end(boolean interrupted) {}
 }
