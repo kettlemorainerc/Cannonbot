@@ -10,37 +10,44 @@ public class Cannon extends SubsystemBase {
     private final Solenoid loadValve;
     private final PressureSensor pressure;
 
-    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
-    private ScheduledFuture<?> scheduledTask;
+//    private Solenoid targetedSolenoid;
+
+    private int delay;
+    private Runnable task;
 
     public Cannon(Solenoid loadValve, Solenoid launchValve, PressureSensor pressure) {
         this.launchValve = launchValve;
         this.loadValve = loadValve;
+//        launchValve.setPulseDuration(.03);
         this.pressure = pressure;
-        scheduler.setRemoveOnCancelPolicy(true);
     }
 
     public double getCurrentPressure() {return pressure.getCurrentPressure();}
     public boolean isLoadOpen() {return loadValve.get();}
     public boolean isLaunchOpen() {return launchValve.get();}
 
-    public void closeLaunch() {launchValve.set(true);}
-    public void closeLoad() {loadValve.set(false);}
+    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(false);}
+    public void closeLoad() {if(isLoadOpen()) loadValve.set(false);}
 
     private void openLaunch() {
+        if(this.delay > 0) return;
+        
         if(isLoadOpen()) {
             closeLoad();
-            schedule(() -> launchValve.set(true), 5);
-        } else {
+            schedule(() -> launchValve.set(true), 2);
+        } else if(!isLaunchOpen()) {
+//            launchValve.startPulse();
             launchValve.set(true);
         }
     }
 
     private void openLoad() {
+        if(this.delay > 0) return;
+
         if(isLaunchOpen()) {
             closeLaunch();
-            schedule(() -> loadValve.set(true), 50);
-        } else {
+            schedule(() -> loadValve.set(true), 2);
+        } else if(!isLoadOpen()) {
             System.out.println("Opening load valve");
             loadValve.set(true);
         }
@@ -59,6 +66,16 @@ public class Cannon extends SubsystemBase {
     }
 
     @Override public void periodic() {
+        if(delay > 0) {
+            delay--;
+            if(delay == 0 && task != null) {
+                System.out.println("Running task: " + System.currentTimeMillis());
+                task.run();
+                task = null;
+                System.out.println("Ran and cleared task: " + System.currentTimeMillis());
+            }
+        }
+
         // TODO: Determine if we want this running and what the target pressure/voltage is
         // don't test pressure if we're actively launching
 //        if(launchValve.get() == Relay.Value.kOn) return;
@@ -73,19 +90,9 @@ public class Cannon extends SubsystemBase {
 
     protected void schedule(
         Runnable task,
-        long millis
+        int ticks
     ) {
-        if(scheduledTask != null && !scheduledTask.isDone()) {
-            scheduledTask.cancel(true);
-        }
-
-        scheduledTask = scheduler.schedule(
-            () -> {
-                scheduledTask = null;
-                task.run();
-            },
-            millis,
-            TimeUnit.MILLISECONDS
-        );
+        delay = Math.max(1, ticks);
+        this.task = task;
     }
 }

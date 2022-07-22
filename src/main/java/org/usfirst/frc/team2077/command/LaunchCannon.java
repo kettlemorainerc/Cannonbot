@@ -21,16 +21,15 @@ public class LaunchCannon extends SelfDefinedCommand {
 
     @Override public void initialize() {
         finished = false;
-        System.out.println("Launching: " + System.currentTimeMillis());
-        cannon.launch();
-        System.out.println("Launched: " + System.currentTimeMillis());
     }
 
     @Override public void execute() {
+        cannon.launch();
         finished = !button.get();
     }
 
     @Override public void end(boolean interrupted) {
+        System.out.println("Finished launch cannon");
         cannon.closeLaunch();
     }
 }
