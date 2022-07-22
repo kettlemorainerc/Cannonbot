@@ -57,8 +57,8 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 //        CHASSIS = new SwerveChassis(this);
 
         // TODO: determine channels
-        Solenoid loadValve = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
-        Solenoid launchValve = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
+        Solenoid loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
+        Solenoid launchValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 0);
         PressureSensor pressure = new PressureSensor(2);
         CANNON = new Cannon(loadValve, launchValve, pressure);
     }
