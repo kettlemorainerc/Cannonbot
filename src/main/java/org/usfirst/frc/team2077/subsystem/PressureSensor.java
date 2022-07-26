@@ -11,7 +11,10 @@ public class PressureSensor extends SubsystemBase {
         this.sensor = new AnalogInput(analogSlot);
     }
 
-    public double getCurrentPressure() {return pressure;}
+    public double getCurrentPressure() {
+        updatePressure();
+        return pressure;
+    }
 
     protected void updatePressure() {
         double voltage = sensor.getVoltage();
