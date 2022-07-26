@@ -23,6 +23,7 @@ public class LoadLauncher extends SelfDefinedCommand {
 
     @Override public void execute() {
         cannon.load();
+//        System.out.println("TEST+ "+cannon.getCurrentPressure());
         executed = true;
     }
     @Override public void end(boolean interrupted) {}

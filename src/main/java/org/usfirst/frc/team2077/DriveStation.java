@@ -65,9 +65,17 @@ public class DriveStation {
         JoystickButton stopLoad = new JoystickButton(secondary, 5);
         JoystickButton launch = new JoystickButton(secondary, 2);
 
+        JoystickButton up = new JoystickButton(secondary, 4);
+        JoystickButton down = new JoystickButton(secondary, 8);
+
+
+
         new LoadLauncher(hardware).bind(load);
         new StopLoading(hardware).bind(stopLoad);
         new LaunchCannon(hardware, launch).bind(launch);
+
+        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(up);
+        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(down);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */
