@@ -10,11 +10,11 @@ public class ChangePistonHeight extends RepeatedCommand {
     public enum PistonDirection{
         UP(1),
         DOWN(-1);
-        private final double direction;
-        PistonDirection(double direction) {
+        private final int direction;
+        PistonDirection(int direction) {
             this.direction = direction;
         }
-        public double getDirection(){
+        public int getDirection(){
             return direction;
         }
     }
