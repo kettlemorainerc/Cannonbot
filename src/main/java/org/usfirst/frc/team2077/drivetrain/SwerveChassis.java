@@ -1,19 +1,24 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 
-import org.usfirst.frc.team2077.RobotHardware;
+import org.usfirst.frc.team2077.common.RobotHardware;
 import org.usfirst.frc.team2077.common.drivetrain.AbstractChassis;
+import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
 import org.usfirst.frc.team2077.common.sensors.AngleSensor;
+import org.usfirst.frc.team2077.math.SwerveMath;
+import org.usfirst.frc.team2077.math.SwerveTargetValues;
+import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.VelocityDirection.*;
 import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.VelocityDirection.EAST;
 
-public class SwerveChassis extends AbstractChassis {
+public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     private static final double WHEELBASE = 20.375; // inches
     private static final double TRACK_WIDTH = 25.5; // inches
     private static final double WHEEL_RADIUS = 4.0; // inches
@@ -21,15 +26,25 @@ public class SwerveChassis extends AbstractChassis {
 
 //    private static final RotationMotor directionMotor = new RotationMotor();
 
+    private final SwerveMath math;
     private final AngleSensor angleSensor;
-    public final EnumMap<MecanumMath.WheelPosition, SwerveModule> rotationModules;
 
-    public SwerveChassis(RobotHardware hardware, Supplier<Double> getSeconds) {
-        super(null, WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
+    private static EnumMap<MecanumMath.WheelPosition, SwerveMotor> buildDriveTrain(RobotHardware<SwerveMotor> hardware) {
+        EnumMap<MecanumMath.WheelPosition, SwerveMotor> map = new EnumMap<>(MecanumMath.WheelPosition.class);
+
+        for(MecanumMath.WheelPosition p : MecanumMath.WheelPosition.values()) {
+            map.put(p, hardware.getWheel(p).motor);
+        }
+
+        return map;
+    }
+
+    public SwerveChassis(RobotHardware<SwerveMotor> hardware, Supplier<Double> getSeconds) {
+        super(buildDriveTrain(hardware), WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 //        super(buildDriveModule(pos -> hardware.getWheel(pos).motor), WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 //        rotationModules = buildDriveModule(hardware::getRotationModule);
-        rotationModules = null;
         this.angleSensor = hardware.getAngleSensor();
+        math = new SwerveMath(WHEELBASE, TRACK_WIDTH);
     }
 
 

@@ -91,8 +91,8 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         targetAngle = angle;
         double currentWheelAngle = getWheelAngle();
         double changeWheelAngle = currentWheelAngle - this.targetAngle;
-        if(Math.abs(changeWheelAngle) > SwerveMotor.DEAD_ANGLE){
-            if(Math.abs(changeWheelAngle) > 90){//Rotate Counter-Clockwise
+        if(Math.abs(changeWheelAngle) > SwerveMotor.DEAD_ANGLE) {
+            if(Math.abs(changeWheelAngle) > 90){ // Rotate Counter-Clockwise
 
             }
         }
