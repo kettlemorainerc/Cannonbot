@@ -46,6 +46,7 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
     }
 
+
     private static final double Pvalue = 1.0;
     private static final double Ivalue = 0.0;
     private static final double Dvalue = 0.0;
@@ -60,7 +61,7 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
 
     private double targetAngle = 0, targetMagnitude = 0;
-
+    private boolean flipMagnitude, clockwise;
     private double lastError = 0.0;
     private double errorAccum = 0.0;
 
@@ -87,16 +88,54 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         this.targetMagnitude = magnitude;
     }
 
-    public void setTargetAngle(double angle){
+    public void setTargetAngle(double angle) {
+
+
         targetAngle = angle;
         double currentWheelAngle = getWheelAngle();
-        double changeWheelAngle = currentWheelAngle - this.targetAngle;
-        if(Math.abs(changeWheelAngle) > SwerveMotor.DEAD_ANGLE) {
-            if(Math.abs(changeWheelAngle) > 90){ // Rotate Counter-Clockwise
 
-            }
+        boolean inTurnaroundRange = false;
+
+        double diff = currentWheelAngle - targetAngle;
+        if(Math.abs(diff) > 180){
+            diff -= 360 * Math.signum(diff);
         }
+        if(Math.abs(diff) > 90){
+            diff -= 180 * Math.signum(diff);
+            inTurnaroundRange = true;
+            targetAngle = currentWheelAngle - diff;
+        }
+
+        if(targetAngle > 360 || targetAngle < 0){
+            targetAngle -= 360 * Math.signum(targetAngle);
+        }
+
+        clockwise = diff < 0;
+        flipMagnitude = inTurnaroundRange;
+
+
+
+//        if(currentWheelAngle < 90 && targetAngle > 270) {
+//            if(currentWheelAngle - targetAngle < -270) {
+//                inTurnaroundRange = false;
+//            }
+//        } else if(currentWheelAngle > 270 && targetAngle < 90) {
+//            if(targetAngle - currentWheelAngle < -270) {
+//                inTurnaroundRange = false;
+//            }
+//        } else if(Math.abs(targetAngle - currentWheelAngle) < 90) {
+//            inTurnaroundRange = false;
+//        }
+
+//        double changeWheelAngle = currentWheelAngle - this.targetAngle;
+//        if(Math.abs(changeWheelAngle) > SwerveMotor.DEAD_ANGLE){
+//            if(Math.abs(changeWheelAngle) > 90){//Rotate Counter-Clockwise
     }
+
+
+
+
+
 
     public double getWheelAngle() {
         double angle = encoder.get() * revsPerTick;
@@ -141,7 +180,24 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         long curTime = (long) time.get();
         long dt = (long) (curTime - lastTime);
         lastTime = curTime;
+        double currentAngle = getWheelAngle();
+        double diff = currentAngle - targetAngle;
+
+        if(Math.abs(diff) < DEAD_ANGLE){
+            this.talonMotor.set(0);
+        }else if(clockwise){
+            this.talonMotor.set(1);
+        }else{
+            this.talonMotor.set(-1);
+        }
+
+
         // TODO: Don't use go swerve
+
+        if(getWheelAngle() > DEAD_ANGLE){
+            talonMotor.set(0.5);
+        }
+
 //        goSwerve(targetAngle, dt);
 
         // TODO: Determine if we need to rotate to reach our targetAngle and which direction we want to rotate, if so

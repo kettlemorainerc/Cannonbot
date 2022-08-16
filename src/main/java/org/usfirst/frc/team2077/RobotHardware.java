@@ -10,7 +10,7 @@ import org.usfirst.frc.team2077.subsystem.*;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
-public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SparkNeoDriveModule> {
+public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SwerveMotor> {
     private final Subsystem HEADING = new Subsystem() {};
     private final Subsystem POSITION = new Subsystem() {};
     private final AbstractChassis CHASSIS;
@@ -89,8 +89,20 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     }
 
     @Override
-    public CANLineSubsystem<SparkNeoDriveModule> getWheel(MecanumMath.WheelPosition position) {
+    public SwerveMotor getWheel(MecanumMath.WheelPosition position) {
         // TODO: Utilise the newly created Victor type in CANLineSubsystem
+
+        switch(position) {
+            case NORTH_EAST:
+                return northEast;
+            case SOUTH_EAST:
+                return southEast;
+            case SOUTH_WEST:
+                return southWest;
+            case NORTH_WEST:
+                return northWest;
+        }
+
         return null;
     }
 }

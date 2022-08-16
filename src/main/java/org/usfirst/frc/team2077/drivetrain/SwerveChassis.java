@@ -11,6 +11,7 @@ import org.usfirst.frc.team2077.math.SwerveMath;
 import org.usfirst.frc.team2077.math.SwerveTargetValues;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -33,7 +34,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         EnumMap<MecanumMath.WheelPosition, SwerveMotor> map = new EnumMap<>(MecanumMath.WheelPosition.class);
 
         for(MecanumMath.WheelPosition p : MecanumMath.WheelPosition.values()) {
-            map.put(p, hardware.getWheel(p).motor);
+            map.put(p, hardware.getWheel(p));
         }
 
         return map;
@@ -62,6 +63,14 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     protected void updateDriveModules() {
         // The following is the BIG one
         // TODO: Convert targetVelocity to target magnitude and wheel angle
+
+        Map<MecanumMath.WheelPosition, SwerveTargetValues> wheelTargets = math.targetsFor(targetVelocity);
+
+        wheelTargets.forEach( (key, value) -> {
+            SwerveMotor motor = this.driveModule.get(key);
+            motor.setTargetAngle(value.getAngle());
+//            motor.setMagnitude(value.getMagnitude());
+        });
 
         // TODO: update each rotation motor to the target wheel angle (setTargetAngle)
         // TODO: update each driveModule motor to the target magnitude (setPercent)
