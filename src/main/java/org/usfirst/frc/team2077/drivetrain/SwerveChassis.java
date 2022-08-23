@@ -3,7 +3,6 @@ package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.common.RobotHardware;
 import org.usfirst.frc.team2077.common.drivetrain.AbstractChassis;
-import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
 import org.usfirst.frc.team2077.common.sensors.AngleSensor;
@@ -11,7 +10,6 @@ import org.usfirst.frc.team2077.math.SwerveMath;
 import org.usfirst.frc.team2077.math.SwerveTargetValues;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -64,7 +62,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         // The following is the BIG one
         // TODO: Convert targetVelocity to target magnitude and wheel angle
 
-        Map<MecanumMath.WheelPosition, SwerveTargetValues> wheelTargets = math.targetsFor(targetVelocity);
+        Map<MecanumMath.WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(targetVelocity);
 
         wheelTargets.forEach( (key, value) -> {
             SwerveMotor motor = this.driveModule.get(key);

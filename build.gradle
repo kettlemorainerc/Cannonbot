@@ -71,6 +71,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        showStackTraces = true
+        showExceptions = true
+        exceptionFormat = "FULL"
+    }
 }
 
 // Simulation configuration (e.g. environment variables).
