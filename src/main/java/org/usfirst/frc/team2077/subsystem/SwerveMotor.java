@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
@@ -21,9 +22,9 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     */
 
     public enum MotorPosition{
-        FRONT_RIGHT(NORTH_EAST,2, 1,2),
-        FRONT_LEFT(NORTH_WEST,8,7,8),
-        BACK_RIGHT(SOUTH_EAST,4,3,4),
+        FRONT_RIGHT(NORTH_EAST,1, 1,2),
+        FRONT_LEFT(NORTH_WEST,7,7,8),
+        BACK_RIGHT(SOUTH_EAST,3,3,4),
         BACK_LEFT(SOUTH_WEST,5,5,6);
 
         private final MecanumMath.WheelPosition wheelPosition;
@@ -53,29 +54,35 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
     private static final double DEAD_ANGLE = 1.0;
 
-    private static final double revsPerTick =  1D / 414D;
+    private static final double revsPerTick =  360.0 / 414.0;
 
+    public final Talon talonMotor;
+    public final Encoder encoder;
 
-    private final Talon talonMotor;
-    private final Encoder encoder;
-
-
-    private double targetAngle = 0, targetMagnitude = 0;
-    private boolean flipMagnitude, clockwise;
+    private double targetAngle = 135, targetMagnitude = 0;
+    private boolean flipMagnitude, clockwise = true;
     private double lastError = 0.0;
     private double errorAccum = 0.0;
 
     private Timer time = new Timer();
     private double lastTime = 0.0;
+    private MotorPosition position;
 
     public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB){
         talonMotor = new Talon/*SRX*/(talonID);
         encoder = new Encoder(encoderChannelA, encoderChannelB);
         encoder.reset();
+
+        this.register();
     }
 
     public SwerveMotor(MotorPosition motorPosition){
         this(motorPosition.talonID, motorPosition.encoderChannelA, motorPosition.encoderChannelB);
+        position = motorPosition;
+    }
+
+    public void setMagnitude(double magnitude) {
+        setTargetMagnitude(magnitude);
     }
 
     @Override
@@ -89,122 +96,170 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     }
 
     public void setTargetAngle(double angle) {
-
+//        if(
+//            Math.abs(angle - targetAngle) < DEAD_ANGLE ||
+//            Math.abs(angle - targetAngle + 180) < DEAD_ANGLE
+//        ) return;
 
         targetAngle = angle;
         double currentWheelAngle = getWheelAngle();
 
-        boolean inTurnaroundRange = false;
+        double diff = angleDiff(currentWheelAngle, targetAngle);
 
-        double diff = currentWheelAngle - targetAngle;
-        if(Math.abs(diff) > 180){
-            diff -= 360 * Math.signum(diff);
-        }
         if(Math.abs(diff) > 90){
-            diff -= 180 * Math.signum(diff);
-            inTurnaroundRange = true;
-            targetAngle = currentWheelAngle - diff;
+            targetAngle -= 180;
+//            diff -= 180 * Math.signum(diff);
+
         }
 
         if(targetAngle > 360 || targetAngle < 0){
             targetAngle -= 360 * Math.signum(targetAngle);
         }
 
-        clockwise = diff < 0;
-        flipMagnitude = inTurnaroundRange;
 
-
-
-//        if(currentWheelAngle < 90 && targetAngle > 270) {
-//            if(currentWheelAngle - targetAngle < -270) {
-//                inTurnaroundRange = false;
-//            }
-//        } else if(currentWheelAngle > 270 && targetAngle < 90) {
-//            if(targetAngle - currentWheelAngle < -270) {
-//                inTurnaroundRange = false;
-//            }
-//        } else if(Math.abs(targetAngle - currentWheelAngle) < 90) {
-//            inTurnaroundRange = false;
+//        if(sentinel == 0) {
+//            System.out.println("[given=" + angle + "][target=" + targetAngle + "]");
 //        }
-
-//        double changeWheelAngle = currentWheelAngle - this.targetAngle;
-//        if(Math.abs(changeWheelAngle) > SwerveMotor.DEAD_ANGLE){
-//            if(Math.abs(changeWheelAngle) > 90){//Rotate Counter-Clockwise
     }
 
-
-
-
-
-
     public double getWheelAngle() {
-        double angle = encoder.get() * revsPerTick;
+        double angle = -encoder.get() * revsPerTick;
+
         angle = angle % 360.0;
 
-//        if (angle > 180.0) {
-//            angle -= 360.0;
-//        } else if (angle < -180.0) {
-//            angle += 360.0;
-//        }
+        if(angle < 0){
+            angle += 360.0;
+        }
+
+//        while(angle > 360) angle -= 360;
+//        while(angle < 0) angle += 360;
 
         return angle;
     }
 
+    public static MotorPosition LOGGED_POSITION = MotorPosition.FRONT_RIGHT;
+    int localId = 0;
+    int sentinel = 0;
+    double prev;
+//    @Override public void periodic() {
+////        if(Math.abs(talonMotor.get() - prev) > .02) {
+////            System.out.println("[recorded=" + talonMotor.get() + "][prev=" + prev + "]");
+////        }
+////        long curTime = (long) time.get();
+////        long dt = (long) (curTime - lastTime);
+////        lastTime = curTime;
+//
+//
+//        double currentAngle = getWheelAngle();
+//        double diff = angleDiff(currentAngle, targetAngle);
+////        double targetAngle = this.targetAngle;
+//
+//        if(position == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
+//            System.out.println("[target=" + targetAngle + "][current=" + currentAngle + "]");
+//        }
+//
+//        if(targetMagnitude != 0) {
+//            if(Math.abs(diff) < DEAD_ANGLE){
+//                if(talonMotor.get() != 0) {
+//                    if(position == LOGGED_POSITION) System.out.println("Should stop");
+//                    this.talonMotor.set(prev = 0.0);
+//                }
+////                if((sentinel = (sentinel + 1) % 25) == 0) {
+////                    System.out.println("[position=" + position + "][diff=" + diff + "] should be stopped");
+////                }
+//            }else{
+//                double speed;
+//                if(Math.abs(diff) < 40) speed = .15;
+//                else speed = .75;
+//                boolean invert = diff < 0 || diff > 90;
+//                prev = speed;
+//                if(Math.abs(talonMotor.get() - speed) > .02 || (speed == .15 && talonMotor.get() != .15)) {
+//                    this.talonMotor.set(invert ? -speed : speed);
+//                }
+////                if((sentinel = (sentinel + 1) % 25) == 0) {
+////                    System.out.println("[position=" + position + "][diff=" + diff + "][current=" + currentAngle + "][speed=" + speed + "]");
+////                }
+//            }
+//        }else{
+//            if(talonMotor.get() != 0) {
+//                this.talonMotor.set(0.0);
+//            }
+//        }
+//
+//
+////        else if(clockwise){
+////            this.talonMotor.set(Math.abs(diff * 10) /  360);
+////        }else{
+////            this.talonMotor.set(-Math.abs(diff * 10) / 360);
+////        }
+////
+////
+////        // TODO: Don't use go swerve
+////
+//////        if(getWheelAngle() > DEAD_ANGLE){
+//////            talonMotor.set(0.5);
+//////        }
+////
+//////        goSwerve(targetAngle, dt);
+////
+////        // TODO: Determine if we need to rotate to reach our targetAngle and which direction we want to rotate, if so
+////        double currentWheelAngle = getWheelAngle();
+////        double changeWheelAngle = currentWheelAngle - this.targetAngle;
+////
+////        // TODO: update set the talon's request value
+//    }
 
-    // TODO: add comments
-    public void goSwerve(double dir, long dt) {
-
-        // angle error
-        double deltaDir = getWheelAngle() - dir;
-
-        // Map the delta onto the same -180 to 180 polar coordinate system
-        // used by the FIRST joystick class.
-        deltaDir = deltaDir % 360;
-        if (deltaDir > 180.0) {
-            deltaDir -= 360.0;
-        } else if (deltaDir < -180.0) {
-            deltaDir += 360.0;
-        }
-
-        // Start PID
-        double error = deltaDir / 180.0;
-        errorAccum += error * dt;
-
-        // Set the direction motor to value specified by PID
-        talonMotor.set(Pvalue * error + Ivalue * errorAccum + Dvalue * ((error - lastError / dt)));
-
-        lastError = error;
+    boolean clockwiseToTarget;
+    @Override public void periodic(){
+        updateRotation();
     }
 
-    @Override public void periodic() {
-        long curTime = (long) time.get();
-        long dt = (long) (curTime - lastTime);
-        lastTime = curTime;
+    private void updateRotation(){
+        if(this.targetMagnitude == 0){
+            setTalonMotor(0);
+            return;
+        }
+
         double currentAngle = getWheelAngle();
-        double diff = currentAngle - targetAngle;
+        double diff = angleDiff(currentAngle, targetAngle);
 
-        if(Math.abs(diff) < DEAD_ANGLE){
-            this.talonMotor.set(0);
-        }else if(clockwise){
-            this.talonMotor.set(1);
-        }else{
-            this.talonMotor.set(-1);
+        boolean clockwiseToTarget = diff > 0;
+
+        double speed = 1;
+        if(Math.abs(diff) < 30) {
+            speed = diff / 75;
+            if(talonMotor.get() == 0 && speed < 0.15) speed = .15;
         }
 
+        if(Math.abs(diff) < DEAD_ANGLE) speed = 0.0;
 
-        // TODO: Don't use go swerve
-
-        if(getWheelAngle() > DEAD_ANGLE){
-            talonMotor.set(0.5);
+        if(clockwiseToTarget != this.clockwiseToTarget){
+            speed *= -1;
         }
 
-//        goSwerve(targetAngle, dt);
+        this.clockwiseToTarget = clockwiseToTarget;
 
-        // TODO: Determine if we need to rotate to reach our targetAngle and which direction we want to rotate, if so
-        double currentWheelAngle = getWheelAngle();
-        double changeWheelAngle = currentWheelAngle - this.targetAngle;
+        setTalonMotor(speed);
+    }
 
-        // TODO: update set the talon's request value
+    private void setTalonMotor(double percent){
+        if(talonMotor.get() != percent){
+            talonMotor.set(percent);
+        }
+    }
+
+    public MotorPosition getPosition(){
+        return position;
+    }
+
+    private double angleDiff(double from, double to){
+        double diff = from - to;
+
+        if(Math.abs(diff) > 180){
+            diff -= 360 * Math.signum(diff);
+        }
+
+        return diff;
     }
 
 }
