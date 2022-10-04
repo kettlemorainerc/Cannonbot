@@ -25,9 +25,10 @@ public class ChangePistonHeight extends RepeatedCommand {
 
     //TODO: make sure this works;
     public ChangePistonHeight(RobotHardware hardware, PistonDirection direction){
-        screw = new TalonSRX(/*TODO: find port*/99);
+        screw = new TalonSRX(9);
         screw.configFactoryDefault();
         this.direction = direction;
+//        addRequirements(screw);
     }
 
     public void execute() {

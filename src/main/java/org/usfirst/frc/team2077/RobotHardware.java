@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.common.sensors.AngleSensor;
 import org.usfirst.frc.team2077.common.subsystems.*;
+import org.usfirst.frc.team2077.drivetrain.SwerveChassis;
 import org.usfirst.frc.team2077.subsystem.*;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
@@ -16,6 +17,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     private final AbstractChassis CHASSIS;
 
     public final Cannon CANNON;
+    public final AirCompressor AIRCOMPRESSOR;
     public static final double WHEELBASE = 20.375; // inches
     public static final double TRACK_WIDTH = 25.5; // inches
     public static final double WHEEL_RADIUS = 4.0; // inches
@@ -52,13 +54,16 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 
     public RobotHardware() {
-        CHASSIS = null; // new MecanumChassis(this);
+        CHASSIS = new SwerveChassis(this); // new MecanumChassis(this);
+
+
+        AIRCOMPRESSOR = new AirCompressor(0);
 //        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new SwerveChassis(this);
 
         // TODO: determine channels
         Solenoid loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
-        Solenoid launchValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 0);
+        Relay launchValve = new Relay(1, Relay.Direction.kBoth);
         PressureSensor pressure = new PressureSensor(2);
         CANNON = new Cannon(loadValve, launchValve, pressure);
     }
@@ -70,7 +75,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
     @Override
     public Subsystem getPosition() {
-        return null;
+        return POSITION;
     }
 
     @Override

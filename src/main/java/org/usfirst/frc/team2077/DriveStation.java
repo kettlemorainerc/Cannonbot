@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.command.*;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.commands.*;
+import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 
 /**
  * This class is intended to be the center point of defining actions that can be utilized during teleop segments of
@@ -48,11 +49,21 @@ public class DriveStation {
      * control method.
      */
     public void bind(RobotHardware hardware) {
-//        hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
-//        hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
+        hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
+        hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
+
+//        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST).talonMotor));
+//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST).talonMotor));
+//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).talonMotor));
+//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).talonMotor));
+
+        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
+        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
+        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
+        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST)));
 
         bindDriverControl(hardware, driveStick);
-        bindTechnicalControl(hardware, technicalStick);
+//        bindTechnicalControl(hardware, technicalStick);
     }
 
     /** Bind primary driver's button commands here */
@@ -65,23 +76,24 @@ public class DriveStation {
         JoystickButton stopLoad = new JoystickButton(secondary, 5);
         JoystickButton launch = new JoystickButton(secondary, 2);
 
-        JoystickButton up = new JoystickButton(secondary, 4);
-        JoystickButton down = new JoystickButton(secondary, 8);
-
+        JoystickButton pistonUp = new JoystickButton(secondary, 12);
+        JoystickButton pistonDown = new JoystickButton(secondary, 16);
+        JoystickButton toggleAirCompressor = new JoystickButton(secondary, 6);
 
 
         new LoadLauncher(hardware).bind(load);
         new StopLoading(hardware).bind(stopLoad);
         new LaunchCannon(hardware, launch).bind(launch);
+        new ToggleAirCompressor(hardware).bind(toggleAirCompressor);
 
-        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(up);
-        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(down);
+        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
+        new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(pistonDown);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */
     private static DriveJoystick getJoystick() {
-        return new DriveJoystick(DRIVE_JOYSTICK_PORT).setDriveSensitivity(.15, 5)
-                                                     .setRotationSensitivity(.1, 1);
+        return new DriveJoystick(DRIVE_JOYSTICK_PORT).setDriveSensitivity(.3, 5)
+                                                     .setRotationSensitivity(.4, 1);
     }
 
     /** Flysky Drone Controller */

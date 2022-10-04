@@ -124,6 +124,15 @@ public class SwerveMath {
             );
         }
 
+        if(rotation == 0 && north == 0 && strafe == 0) {
+            return Map.of(
+                    MecanumMath.WheelPosition.NORTH_WEST, new SwerveTargetValues(0, 0),
+                    MecanumMath.WheelPosition.NORTH_EAST, new SwerveTargetValues(0, 0),
+                    MecanumMath.WheelPosition.SOUTH_WEST, new SwerveTargetValues(0, 0),
+                    MecanumMath.WheelPosition.SOUTH_EAST, new SwerveTargetValues(0, 0)
+            );
+        }
+
         // Some mix of north/strafe/rotation
         Map<RobotSide, Double> valueMap = createRobotSideValueMap(north, strafe, rotation);
 

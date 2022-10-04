@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import java.awt.*;
 
 public class Cannon extends SubsystemBase {
-    private final Solenoid launchValve;
+    private final Relay launchValve;
     private final Solenoid loadValve;
     private final PressureSensor pressure;
 
@@ -39,7 +39,7 @@ public class Cannon extends SubsystemBase {
 
     }
 
-    public Cannon(Solenoid loadValve, Solenoid launchValve, PressureSensor pressure) {
+    public Cannon(Solenoid loadValve, Relay launchValve, PressureSensor pressure) {
         this.launchValve = launchValve;
         this.loadValve = loadValve;
 //        launchValve.setPulseDuration(.03);
@@ -63,9 +63,9 @@ public class Cannon extends SubsystemBase {
         }
     }
     public boolean isLoadOpen() {return loadValve.get();}
-    public boolean isLaunchOpen() {return launchValve.get();}
+    public boolean isLaunchOpen() {return launchValve.get() == Relay.Value.kOn;}
 
-    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(false);}
+    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(Relay.Value.kOff);}
     public void closeLoad() {if(isLoadOpen()) loadValve.set(false);}
 
     private void openLaunch() {
@@ -73,10 +73,10 @@ public class Cannon extends SubsystemBase {
         
         if(isLoadOpen()) {
             closeLoad();
-            schedule(() -> launchValve.set(true), 2);
+            schedule(() -> launchValve.set(Relay.Value.kOn), 2);
         } else if(!isLaunchOpen()) {
 //            launchValve.startPulse();
-            launchValve.set(true);
+            launchValve.set(Relay.Value.kOn);
         }
     }
 
