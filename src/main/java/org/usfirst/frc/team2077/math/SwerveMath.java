@@ -70,19 +70,10 @@ public class SwerveMath {
         // D
         multipliers.put(RobotSide.LEFT, forward + rotation * trackWidth / R);
 
-//        // A
-//        multipliers.put(RobotSide.BACK, 1d);
-//        // B
-//        multipliers.put(RobotSide.FRONT, 1d);
-//        // C
-//        multipliers.put(RobotSide.RIGHT, 1d);
-//        // D
-//        multipliers.put(RobotSide.LEFT, 1d);
-
         return multipliers;
     }
 
-    public SwerveTargetValues targetsFor(
+    private SwerveTargetValues wheelTargets(
         Map<RobotSide, Double> values,
         RobotSide east,
         RobotSide north
@@ -99,30 +90,12 @@ public class SwerveMath {
         return new SwerveTargetValues(mag, ang);
     }
 
-    public Map<MecanumMath.WheelPosition, SwerveTargetValues> targetsFor(
+    public Map<MecanumMath.WheelPosition, SwerveTargetValues> targetsForVelocities(
         Map<MecanumMath.VelocityDirection, Double> targetMagnitudes
     ) {
         double north = targetMagnitudes.get(MecanumMath.VelocityDirection.NORTH);
         double strafe = targetMagnitudes.get(MecanumMath.VelocityDirection.EAST);
         double rotation = targetMagnitudes.get(MecanumMath.VelocityDirection.ROTATION);
-        if(rotation != 0 && north == 0 && strafe == 0) {
-            if(rotation > 0) { // clockwise
-                return Map.of(
-                    MecanumMath.WheelPosition.NORTH_WEST, new SwerveTargetValues(Math.abs(rotation), 90),
-                    MecanumMath.WheelPosition.NORTH_EAST, new SwerveTargetValues(Math.abs(rotation), 90),
-                    MecanumMath.WheelPosition.SOUTH_WEST, new SwerveTargetValues(Math.abs(rotation), 270),
-                    MecanumMath.WheelPosition.SOUTH_EAST, new SwerveTargetValues(Math.abs(rotation), 270)
-                );
-            }
-
-            // counter-clockwise
-            return Map.of(
-                MecanumMath.WheelPosition.NORTH_WEST, new SwerveTargetValues(Math.abs(rotation), 270),
-                MecanumMath.WheelPosition.NORTH_EAST, new SwerveTargetValues(Math.abs(rotation), 270),
-                MecanumMath.WheelPosition.SOUTH_WEST, new SwerveTargetValues(Math.abs(rotation), 90),
-                MecanumMath.WheelPosition.SOUTH_EAST, new SwerveTargetValues(Math.abs(rotation), 90)
-            );
-        }
 
         if(rotation == 0 && north == 0 && strafe == 0) {
             return Map.of(
@@ -138,7 +111,7 @@ public class SwerveMath {
 
         Map<MecanumMath.WheelPosition, SwerveTargetValues> targetValues = new EnumMap<>(MecanumMath.WheelPosition.class);
 
-        WHEEL_TO_SIDES.forEach((position, sides) -> targetValues.put(position, targetsFor(valueMap, sides.east, sides.north)));
+        WHEEL_TO_SIDES.forEach((position, sides) -> targetValues.put(position, wheelTargets(valueMap, sides.east, sides.north)));
 
         double max = targetValues.values().stream().mapToDouble(SwerveTargetValues::getMagnitude).max().orElse(0d);
         if(max > 1) targetValues.values().forEach(val -> val.setMagnitude(val.getMagnitude() / max));
