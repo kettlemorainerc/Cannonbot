@@ -2,6 +2,7 @@ package org.usfirst.frc.team2077;
 
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.common.sensors.AngleSensor;
@@ -18,6 +19,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
     public final Cannon CANNON;
     public final AirCompressor AIRCOMPRESSOR;
+    public final Talon PISTON = new Talon(9);
     public static final double WHEELBASE = 20.375; // inches
     public static final double TRACK_WIDTH = 25.5; // inches
     public static final double WHEEL_RADIUS = 4.0; // inches
@@ -57,13 +59,13 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
         CHASSIS = new SwerveChassis(this); // new MecanumChassis(this);
 
 
-        AIRCOMPRESSOR = new AirCompressor(0);
+        AIRCOMPRESSOR = new AirCompressor(1);
 //        CHASSIS = new MecanumChassis(this);
 //        CHASSIS = new SwerveChassis(this);
 
         // TODO: determine channels
         Solenoid loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
-        Relay launchValve = new Relay(1, Relay.Direction.kBoth);
+        Relay launchValve = new Relay(0, Relay.Direction.kForward);
         PressureSensor pressure = new PressureSensor(2);
         CANNON = new Cannon(loadValve, launchValve, pressure);
     }

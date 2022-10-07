@@ -3,8 +3,8 @@ package org.usfirst.frc.team2077.subsystem;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.motorcontrol.Victor;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
@@ -22,21 +22,23 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     */
 
     public enum MotorPosition{
-        FRONT_RIGHT(NORTH_EAST,1, 1,2),
-        FRONT_LEFT(NORTH_WEST,7,7,8),
-        BACK_RIGHT(SOUTH_EAST,3,3,4),
-        BACK_LEFT(SOUTH_WEST,5,5,6);
+        FRONT_RIGHT(NORTH_EAST,1, 1,2, 2),
+        FRONT_LEFT(NORTH_WEST,7,7,8, 8),
+        BACK_RIGHT(SOUTH_EAST,3,3,4, 4),
+        BACK_LEFT(SOUTH_WEST,5,5,6, 6);
 
         private final MecanumMath.WheelPosition wheelPosition;
         private final int talonID;
         private final int encoderChannelA;
         private final int encoderChannelB;
+        private final int victorId;
 
-        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB){
+        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB, int victorId){
             this.wheelPosition =  wheelPosition;
             this.talonID = talonId;
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
+            this.victorId = victorId;
         }
 
         public static MotorPosition of(MecanumMath.WheelPosition pos) {
@@ -56,8 +58,10 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
     private static final double revsPerTick =  360.0 / 414.0;
 
-    public final Talon talonMotor;
+    public final Victor rotationMotor;
     public final Encoder encoder;
+
+    private final Talon magnitudeMotor;
 
     private double targetAngle = 135, targetMagnitude = 0;
     private boolean flipMagnitude, clockwise = true;
@@ -68,16 +72,19 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     private double lastTime = 0.0;
     private MotorPosition position;
 
-    public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB){
-        talonMotor = new Talon/*SRX*/(talonID);
+    public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB, int victorId){
+        rotationMotor = new Victor/*SRX*/(talonID);
         encoder = new Encoder(encoderChannelA, encoderChannelB);
+
+        magnitudeMotor = new Talon(victorId);
+
         encoder.reset();
 
         this.register();
     }
 
     public SwerveMotor(MotorPosition motorPosition){
-        this(motorPosition.talonID, motorPosition.encoderChannelA, motorPosition.encoderChannelB);
+        this(motorPosition.talonID, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.victorId);
         position = motorPosition;
     }
 
@@ -106,8 +113,10 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
         double diff = angleDiff(currentWheelAngle, targetAngle);
 
+        flipMagnitude = false;
         if(Math.abs(diff) > 90){
             targetAngle -= 180;
+            flipMagnitude = true;
 //            diff -= 180 * Math.signum(diff);
 
         }
@@ -211,12 +220,22 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
     boolean clockwiseToTarget;
     @Override public void periodic(){
-        updateRotation();
+
+        updateMagnitude();
+
+//        updateRotation();
+
+    }
+
+    private void updateMagnitude(){
+
+        magnitudeMotor.set(targetMagnitude * 0.5);
+
     }
 
     private void updateRotation(){
         if(this.targetMagnitude == 0){
-            setTalonMotor(0);
+            setRotationMotor(0);
             return;
         }
 
@@ -228,7 +247,7 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         double speed = 1;
         if(Math.abs(diff) < 30) {
             speed = diff / 75;
-            if(talonMotor.get() == 0 && speed < 0.15) speed = .15;
+            if(rotationMotor.get() == 0 && speed < 0.15) speed = .15;
         }
 
         if(Math.abs(diff) < DEAD_ANGLE) speed = 0.0;
@@ -239,12 +258,12 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
         this.clockwiseToTarget = clockwiseToTarget;
 
-        setTalonMotor(speed);
+        setRotationMotor(speed);
     }
 
-    private void setTalonMotor(double percent){
-        if(talonMotor.get() != percent){
-            talonMotor.set(percent);
+    private void setRotationMotor(double percent){
+        if(rotationMotor.get() != percent){
+            rotationMotor.set(percent);
         }
     }
 

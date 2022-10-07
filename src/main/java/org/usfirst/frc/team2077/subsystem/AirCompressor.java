@@ -10,7 +10,7 @@ public class AirCompressor extends SubsystemBase {
 
     public AirCompressor(int channel) {
 
-        relay = new Relay(channel, Relay.Direction.kBoth);
+        relay = new Relay(channel, Relay.Direction.kForward);
 
     }
 
