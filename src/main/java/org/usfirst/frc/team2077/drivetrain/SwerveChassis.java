@@ -46,6 +46,11 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
 //        rotationModules = buildDriveModule(hardware::getRotationModule);
         this.angleSensor = hardware.getAngleSensor();
         math = new SwerveMath(WHEELBASE, TRACK_WIDTH);
+
+        this.maximumRotation = 1;
+        this.maximumSpeed = 1;
+        this.minimumRotation = 0;
+        this.minimumSpeed = 0;
     }
 
     public SwerveChassis(RobotHardware<SwerveMotor> hardware) {
@@ -76,7 +81,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
             SwerveMotor motor = this.driveModule.get(key);
 
             if(key == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
-//                System.out.println("targets=" + value);
+//                System.out.println("[position=" + LOGGED_POSITION + "][targets=" + value + ']');
             }
             motor.setTargetAngle(value.getAngle());
             motor.setMagnitude(value.getMagnitude());
