@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.command;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -20,7 +21,7 @@ public class ChangePistonHeight extends RepeatedCommand {
         }
     }
 
-    private final Talon screw;
+    private final TalonSRX screw;
     private final double motorSpeed = 0.75;
     private PistonDirection direction;
 
@@ -33,7 +34,7 @@ public class ChangePistonHeight extends RepeatedCommand {
 
     @Override
     public void initialize() {
-        screw.set(motorSpeed * direction.getDirection());
+        screw.set(ControlMode.PercentOutput, motorSpeed * direction.getDirection());
     }
 
     @Override
@@ -41,6 +42,6 @@ public class ChangePistonHeight extends RepeatedCommand {
 
     @Override
     public void end(boolean interrupted) {
-        screw.set(0);
+        screw.set(ControlMode.PercentOutput, 0);
     }
 }
