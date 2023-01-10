@@ -39,13 +39,13 @@ public class DriveStation {
 
         useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST).rotationMotor));
         useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST).rotationMotor));
-        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).rotationMotor));
-        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).rotationMotor));
+        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).rotationMotor));
+        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).rotationMotor));
 
-//        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
-//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
-//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
-//        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST)));
+        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
+        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
+        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST)));
+        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);

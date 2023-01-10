@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -19,7 +20,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
     public final Cannon CANNON;
     public final AirCompressor AIRCOMPRESSOR;
-    public final Talon PISTON = new Talon(9);
+    public final TalonSRX PISTON = new TalonSRX(9);
     public static final double WHEELBASE = 20.375; // inches
     public static final double TRACK_WIDTH = 25.5; // inches
     public static final double WHEEL_RADIUS = 4.0; // inches
