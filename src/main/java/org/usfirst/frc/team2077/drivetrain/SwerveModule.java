@@ -8,5 +8,4 @@ public interface SwerveModule extends DriveModuleIF {
 
     public void setTargetMagnitude(double magnitude);
 
-    public double getWheelAngle();
 }
