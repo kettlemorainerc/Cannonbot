@@ -5,4 +5,5 @@ public interface SwerveModule {
     public void setTargetDegrees(double degrees);
 
     public void setTargetMagnitude(double magnitude);
+
 }
