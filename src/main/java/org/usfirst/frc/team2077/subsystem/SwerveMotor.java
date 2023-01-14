@@ -68,6 +68,9 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     private final CANSparkMax magnitudeMotor;
 
     private double targetAngle = 135, targetMagnitude = 0;
+
+    private double previousDirectionMotorPercent = 0;
+
     private boolean flipMagnitude;
 
     private double lastError = 0.0;
@@ -119,7 +122,15 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         double angleDifference = getAngleDifference(currentWheelAngle, targetAngle);
 
         flipMagnitude = false;
-        if(Math.abs(angleDifference) > 90){
+        if(
+            Math.abs(angleDifference) > 90 &&
+            //We're not sure if this actually makes a difference
+            //Is supposed prevent turning around if already heading in one direction
+            (
+                previousDirectionMotorPercent == 0  ||
+                Math.signum(previousDirectionMotorPercent) != Math.signum(angleDifference)
+            )
+        ){
             targetAngle -= 180;
             flipMagnitude = true;
         }
@@ -186,8 +197,8 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
     private void setDirectionMotor(double percent){
 //        if(rotationMotor.getMotorOutputPercent() != percent){
-
-        directionMotor.set(ControlMode.PercentOutput,percent);
+        previousDirectionMotorPercent = percent;
+        directionMotor.set(ControlMode.PercentOutput, percent);
     }
 
     public MotorPosition getPosition(){
