@@ -1,9 +1,12 @@
 package org.usfirst.frc.team2077.subsystem;
 
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.motorcontrol.Victor;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
@@ -22,23 +25,26 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     */
 
     public enum MotorPosition{
-        FRONT_RIGHT(NORTH_EAST,1, 1,2, 2),
-        FRONT_LEFT(NORTH_WEST,7,7,8, 8),
-        BACK_RIGHT(SOUTH_EAST,3,3,4, 4),
-        BACK_LEFT(SOUTH_WEST,5,5,6, 6);
+        FRONT_RIGHT(NORTH_EAST,1, 1,2, 2, 0),
+        FRONT_LEFT(NORTH_WEST,7,7,8, 8, 9),
+        BACK_RIGHT(SOUTH_EAST,3,3,4, 4, 9),
+        BACK_LEFT(SOUTH_WEST,5,5,6, 6, 9);
 
         private final MecanumMath.WheelPosition wheelPosition;
         private final int talonID;
         private final int encoderChannelA;
         private final int encoderChannelB;
         private final int victorId;
+        private final int hallEffectChannel;
 
-        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB, int victorId){
+        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB, int victorId, int hallEffectChannel){
             this.wheelPosition =  wheelPosition;
             this.talonID = talonId;
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
             this.victorId = victorId;
+            this.hallEffectChannel = hallEffectChannel;
+
         }
 
         public static MotorPosition of(MecanumMath.WheelPosition pos) {
@@ -71,8 +77,9 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     private Timer time = new Timer();
     private double lastTime = 0.0;
     private MotorPosition position;
+    private PWM hallEffectSensor;
 
-    public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB, int victorId){
+    public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB, int victorId, int hallEffectChannel){
         rotationMotor = new Victor/*SRX*/(talonID);
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
@@ -81,10 +88,12 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         encoder.reset();
 
         this.register();
+
+        hallEffectSensor = new PWM(hallEffectChannel);
     }
 
     public SwerveMotor(MotorPosition motorPosition){
-        this(motorPosition.talonID, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.victorId);
+        this(motorPosition.talonID, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.victorId, motorPosition.hallEffectChannel);
         position = motorPosition;
     }
 
@@ -129,6 +138,10 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 //        if(sentinel == 0) {
 //            System.out.println("[given=" + angle + "][target=" + targetAngle + "]");
 //        }
+    }
+
+    public void setRotationPercent(double percent){
+        rotationMotor.set(percent);
     }
 
     public double getWheelAngle() {
@@ -223,6 +236,7 @@ public class SwerveMotor implements Subsystem, SwerveModule {
 
         updateMagnitude();
 
+
 //        updateRotation();
 
     }
@@ -279,6 +293,13 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         }
 
         return diff;
+    }
+
+    public boolean isAligned(){
+        return hallEffectSensor.getRaw() > 0;
+    }
+    public int getHallValue(){
+        return hallEffectSensor.getRaw();
     }
 
 }

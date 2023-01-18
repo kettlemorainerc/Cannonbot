@@ -79,7 +79,7 @@ public class DriveStation {
         JoystickButton pistonUp = new JoystickButton(secondary, 12);
         JoystickButton pistonDown = new JoystickButton(secondary, 16);
         JoystickButton toggleAirCompressor = new JoystickButton(secondary, 6);
-
+        JoystickButton calibrateRotation = new JoystickButton(secondary, 3);
 
         new LoadLauncher(hardware).bind(load);
         new StopLoading(hardware).bind(stopLoad);
@@ -88,6 +88,7 @@ public class DriveStation {
 
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(pistonDown);
+        new CalibrateRotation(hardware).bind(calibrateRotation);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */
