@@ -1,19 +1,20 @@
 package org.usfirst.frc.team2077.subsystem;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.Timer;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.motorcontrol.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
 import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.WheelPosition.*;
 
-public class SwerveMotor implements Subsystem, SwerveModule {
+public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     /* This is, essentially, what the public enum below does
     public static class MotorPosition {
@@ -25,10 +26,14 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     */
 
     public enum MotorPosition{
-        FRONT_RIGHT(NORTH_EAST,1, 1,2, 2, 0),
-        FRONT_LEFT(NORTH_WEST,7,7,8, 8, 9),
-        BACK_RIGHT(SOUTH_EAST,3,3,4, 4, 9),
-        BACK_LEFT(SOUTH_WEST,5,5,6, 6, 9);
+        FRONT_RIGHT(NORTH_EAST,1, 1,2, 2, 0,6.67,2,5600),
+        // MAX_RPM: 5800
+        FRONT_LEFT(NORTH_WEST,7,7,8, 8, 10,6.67,2,5600),
+        // Max: 5600
+        BACK_RIGHT(SOUTH_EAST,3,3,4, 4, 11,6.67,2,5600),
+        // Max: 5700
+        BACK_LEFT(SOUTH_WEST,5,5,6, 6, 12,6.67,2,5600);
+        // Max 5700
 
         private final MecanumMath.WheelPosition wheelPosition;
         private final int talonID;
@@ -36,14 +41,20 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         private final int encoderChannelB;
         private final int victorId;
         private final int hallEffectChannel;
-
-        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB, int victorId, int hallEffectChannel){
+        private final double gearRatio;
+        private final double radius;
+        private final double maxRPM;
+        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int talonId, int encoderChannelA, int encoderChannelB, int victorId, int hallEffectChannel, double gearRatio, double radius, double maxRPM){
             this.wheelPosition =  wheelPosition;
             this.talonID = talonId;
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
             this.victorId = victorId;
             this.hallEffectChannel = hallEffectChannel;
+            this.gearRatio = gearRatio;
+            this.radius = radius;
+            this.maxRPM = maxRPM;
+
 
         }
 
@@ -67,7 +78,7 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     public final Victor rotationMotor;
     public final Encoder encoder;
 
-    private final Talon magnitudeMotor;
+    private final CANSparkMax magnitudeMotor;
 
     private double targetAngle = 135, targetMagnitude = 0;
     private boolean flipMagnitude, clockwise = true;
@@ -77,19 +88,20 @@ public class SwerveMotor implements Subsystem, SwerveModule {
     private Timer time = new Timer();
     private double lastTime = 0.0;
     private MotorPosition position;
-    private PWM hallEffectSensor;
+    private DigitalInput hallEffectSensor;
 
     public SwerveMotor(int talonID, int encoderChannelA, int encoderChannelB, int victorId, int hallEffectChannel){
         rotationMotor = new Victor/*SRX*/(talonID);
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
-        magnitudeMotor = new Talon(victorId);
+        magnitudeMotor = new CANSparkMax(victorId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
         encoder.reset();
 
         this.register();
 
-        hallEffectSensor = new PWM(hallEffectChannel);
+        hallEffectSensor = new DigitalInput(hallEffectChannel);
+
     }
 
     public SwerveMotor(MotorPosition motorPosition){
@@ -295,11 +307,39 @@ public class SwerveMotor implements Subsystem, SwerveModule {
         return diff;
     }
 
-    public boolean isAligned(){
-        return hallEffectSensor.getRaw() > 0;
+
+    public boolean getHallValue(){
+        return hallEffectSensor.get();
     }
-    public int getHallValue(){
-        return hallEffectSensor.getRaw();
+
+    public double getMaximumSpeed() {
+        return (position.maxRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
     }
+
+    @Override
+    public void setVelocity(double velocity) {
+
+    }
+
+    @Override
+    public MecanumMath.WheelPosition getWheelPosition() {
+        return null;
+    }
+
+    @Override
+    public double getVelocity() {
+        return 0;
+    }
+
+    @Override
+    public double getDistance() {
+        return 0;
+    }
+
+    @Override
+    public void resetDistance() {
+
+    }
+
 
 }
