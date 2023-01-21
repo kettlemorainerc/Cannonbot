@@ -71,6 +71,8 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.junit.jupiter:junit-jupiter-params"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+    implementation 'org.apache.commons:commons-math3:3.6.1'
 }
 
 test{
