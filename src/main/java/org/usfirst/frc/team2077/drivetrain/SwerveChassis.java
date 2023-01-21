@@ -4,6 +4,7 @@ package org.usfirst.frc.team2077.drivetrain;
 import org.usfirst.frc.team2077.common.Clock;
 import org.usfirst.frc.team2077.common.RobotHardware;
 import org.usfirst.frc.team2077.common.drivetrain.AbstractChassis;
+import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
 import org.usfirst.frc.team2077.common.sensors.AngleSensor;
@@ -12,6 +13,7 @@ import org.usfirst.frc.team2077.math.SwerveMath;
 import org.usfirst.frc.team2077.math.SwerveTargetValues;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,9 +50,13 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         math = new SwerveMath(WHEELBASE, TRACK_WIDTH);
 
         this.maximumRotation = 1;
-        this.maximumSpeed = 1;
+        this.maximumSpeed =  this.driveModule.values()
+                .stream()
+                .map(DriveModuleIF::getMaximumSpeed)
+                .min(Comparator.naturalOrder())
+                .orElseThrow();;
         this.minimumRotation = 0;
-        this.minimumSpeed = 0;
+        this.minimumSpeed =  this.maximumSpeed * 0.1;
     }
 
     public SwerveChassis(RobotHardware<SwerveMotor> hardware) {

@@ -44,10 +44,12 @@ public class CalibrateRotation extends SelfDefinedCommand {
 //        }else{
 //            current.setRotationPercent(0.05);
 //        }
-        SmartDashboard.putNumber("hallValue", hardware[0].getHallValue());
+        SmartDashboard.putBoolean("hallValueRaw", hardware[0].getHallValue());
         finished = true;
 
-//        System.out.println(current + String.valueOf(current.isAligned()));
+        //System.out.println(current + String.valueOf(current.isAligned()));
+        System.out.println(hardware[0].getHallValue());
+
 
     }
 
@@ -55,4 +57,5 @@ public class CalibrateRotation extends SelfDefinedCommand {
     public void end(boolean interrupted) {
 
     }
+    //
 }
