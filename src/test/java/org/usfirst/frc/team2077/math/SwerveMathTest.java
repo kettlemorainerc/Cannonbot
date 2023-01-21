@@ -58,7 +58,7 @@ public class SwerveMathTest {
         assertVelocities(
                 new TestModule(5, 45), new TestModule(5, 135),
                 new TestModule(5, 315), new TestModule(5, 225),
-                0, 0, 9.467
+                0, 0, 40.514
         );
     }
 

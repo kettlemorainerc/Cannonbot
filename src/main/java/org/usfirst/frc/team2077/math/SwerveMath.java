@@ -151,7 +151,7 @@ public class SwerveMath {
     }
 
     public Map<MecanumMath.VelocityDirection, Double> velocitiesForTargets(
-        Map<MecanumMath.WheelPosition, SwerveModule> targets
+        Map<MecanumMath.WheelPosition, ? extends SwerveModule> targets
     ) {
         var stateMatrix = new BlockRealMatrix(8, 1);
 

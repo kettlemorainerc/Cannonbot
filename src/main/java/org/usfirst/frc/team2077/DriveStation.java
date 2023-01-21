@@ -20,7 +20,7 @@ public class DriveStation {
     private static final int NUMPAD_PORT = 5;
 
     private final DriveStick driveStick;
-    private final Joystick technicalStick;
+//    private final Joystick technicalStick;
 
     public DriveStation(RobotHardware hardware) {
 //        driveStick = getFlysky();
@@ -28,7 +28,7 @@ public class DriveStation {
         driveStick = getXbox();
 
 //        technicalStick = getTechnicalJoystick();
-        technicalStick = getNumpad();
+//        technicalStick = getNumpad();
 
         bind(hardware);
     }
@@ -37,18 +37,18 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
-        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST).rotationMotor));
-        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST).rotationMotor));
-        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).rotationMotor));
-        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).rotationMotor));
-
-//        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
-//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
-//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
+//        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST).rotationMotor));
+//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST).rotationMotor));
+//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).rotationMotor));
+//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).rotationMotor));
+//
+//        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
+//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
 //        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST)));
+//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
-        bindTechnicalControl(hardware, technicalStick);
+//        bindTechnicalControl(hardware, technicalStick);
     }
 
     /**

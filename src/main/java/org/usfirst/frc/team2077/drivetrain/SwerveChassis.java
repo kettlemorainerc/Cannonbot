@@ -68,10 +68,20 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     protected void updatePosition() {
         velocitySet = getVelocityCalculated();
         // TODO: update velocityMeasured by reading rotation motors and driveModule motors and calculating the current velocity
-
+        velocityMeasured = math.velocitiesForTargets(driveModule);
         // Technically whichever following todo isn't returned by AbstractChassis#getPosition is optional
         // TODO: update positionSet using velocity set
         // TODO: update positionMeasured using velocity measured
+        positionSet.moveRelative(
+                velocitySet.get(NORTH) * timeSinceLastUpdate,
+                velocitySet.get(EAST) * timeSinceLastUpdate,
+                velocitySet.get(ROTATION) * timeSinceLastUpdate
+        );
+        positionMeasured.moveRelative(
+                velocityMeasured.get(NORTH) * timeSinceLastUpdate,
+                velocityMeasured.get(EAST) * timeSinceLastUpdate,
+                velocityMeasured.get(ROTATION) * timeSinceLastUpdate
+        );
     }
 
     int sentinel;
