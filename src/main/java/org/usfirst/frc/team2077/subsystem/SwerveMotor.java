@@ -245,7 +245,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     @Override
     public double getVelocity() {
-        return 0;
+
+        double rawRPM = magnitudeMotor.getEncoder().getVelocity();
+
+        return (rawRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
+
     }
 
     @Override
