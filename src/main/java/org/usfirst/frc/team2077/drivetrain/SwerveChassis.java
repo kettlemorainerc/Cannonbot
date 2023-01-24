@@ -84,7 +84,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         );
     }
 
-    int sentinel;
+//    int sentinel;
     public static MecanumMath.WheelPosition LOGGED_POSITION = MecanumMath.WheelPosition.NORTH_EAST;
     @Override
     protected void updateDriveModules() {
@@ -96,9 +96,10 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         wheelTargets.forEach( (key, value) -> {
             SwerveMotor motor = this.driveModule.get(key);
 
-            if(key == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
-//                System.out.println("[position=" + LOGGED_POSITION + "][targets=" + value + ']');
-            }
+//            if(key == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
+////                System.out.println("[position=" + LOGGED_POSITION + "][targets=" + value + ']');
+//            }
+
             motor.setTargetAngle(value.getAngle());
             motor.setMagnitude(value.getMagnitude());
         });
