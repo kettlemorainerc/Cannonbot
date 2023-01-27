@@ -14,10 +14,11 @@ import java.util.*;
 
 import static java.lang.Math.toRadians;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.VelocityDirection.*;
 
 public class SwerveMathTest {
-    static double wheelBase = 25.5;
-    static double trackWidth = 21;
+    static double wheelBase = 10;
+    static double trackWidth = 10;
     static SwerveMath math = new SwerveMath(wheelBase, trackWidth);
 
     @Test void simple_targets_return_simple_targets() {
@@ -32,22 +33,22 @@ public class SwerveMathTest {
         assertMagnitudesAngle(0.5, -0.5, 0, 315);
 
         // Use a perfectly square robot for angular velocity, normalizes output
-        var halfY = 2.5;
-        var halfX = 2.5;
+        var halfY = wheelBase / 2;
+        var halfX = trackWidth / 2;
         var garbage = new SwerveDriveKinematics(
                 new Translation2d(-halfX, halfY), new Translation2d(halfX, halfY),
                 new Translation2d(-halfX, -halfY), new Translation2d(halfX, -halfY)
         );
-        for(var thing : garbage.toSwerveModuleStates(new ChassisSpeeds(0, 0, toRadians(1)))) {
+        for(var thing : garbage.toSwerveModuleStates(new ChassisSpeeds(0, 1, toRadians(0)))) {
             System.out.println(thing);
         }
         System.out.println(garbage.toChassisSpeeds(
-                state(20, 45), state(20, 135),
-                state(20, 315), state(20, 225)
+                state(.06, -135), state(.06, 135),
+                state(20, -45), state(.06, 45)
         ));
-        math = new SwerveMath(5, 5);
+
         var test = math.targetsForVelocities(Map.of(
-                MecanumMath.VelocityDirection.NORTH, 0.,
+                NORTH, 0.,
                 MecanumMath.VelocityDirection.EAST, 0.,
                 MecanumMath.VelocityDirection.ROTATION, 1.
         ));
@@ -91,26 +92,26 @@ public class SwerveMathTest {
                 0, 5, 0
         );
 
-        var halfX = wheelBase / 2;
-        var halfY = trackWidth / 2;
-        var theirs = new SwerveDriveKinematics(
-                new Translation2d(-halfX, halfY), new Translation2d(halfX, halfY),
-                new Translation2d(-halfX, -halfY), new Translation2d(halfX, -halfY)
-        );
-        var thing = theirs.toSwerveModuleStates(new ChassisSpeeds(0, 0, toRadians(5)));
-        for(var t : thing) {
-            System.out.println(t);
-        }
-        var theirs2 = theirs.toChassisSpeeds(
-                state(5, 50.53), state(5, 129.47),
-                state(5, 309.47), state(5, 230.53)
-        );
-        System.out.println(theirs2);
+//        var halfX = trackWidth / 2;
+//        var halfY = wheelBase / 2;
+//        var theirs = new SwerveDriveKinematics(
+//                new Translation2d(-halfX, halfY), new Translation2d(halfX, halfY),
+//                new Translation2d(-halfX, -halfY), new Translation2d(halfX, -halfY)
+//        );
+//        var thing = theirs.toSwerveModuleStates(new ChassisSpeeds(0, 0, toRadians(5)));
+//        for(var t : thing) {
+//            System.out.println(t);
+//        }
+//        var theirs2 = theirs.toChassisSpeeds(
+//                state(5, 45), state(5, 135),
+//                state(-5, -45), state(-5, -135)
+//        );
+//        System.out.println(theirs2);
 
         assertVelocities(
                 new TestModule(5, 45), new TestModule(5, 135),
                 new TestModule(5, 315), new TestModule(5, 225),
-                0, 0, 40.15
+                0, 0, 40.514
         );
     }
 
@@ -143,12 +144,12 @@ public class SwerveMathTest {
     ) {
         var velocities = math.velocitiesForTargets(mapOf(
                 frontLeft, frontRight,
-                backRight, backLeft
+                backLeft, backRight
         ));
 
-        assertEquals(forward, velocities.get(MecanumMath.VelocityDirection.NORTH), 0.001, "Forward mismatch");
-        assertEquals(strafe, velocities.get(MecanumMath.VelocityDirection.EAST), 0.001, "East mismatch");
-        assertEquals(angular, velocities.get(MecanumMath.VelocityDirection.ROTATION), 0.001, "Rotation mismatch");
+        var expected = new double []{forward, strafe, angular};
+        var actual = new double []{velocities.get(NORTH), velocities.get(EAST), velocities.get(ROTATION)};
+        assertArrayEquals(expected, actual, 0.001, String.format("%s != %s", Arrays.toString(expected), Arrays.toString(actual)));
     }
 
     private static void assertNotVelocities(
@@ -163,7 +164,7 @@ public class SwerveMathTest {
                 WheelPosition.BACK_LEFT, backLeft
         ));
 
-        assertNotEquals(forward, velocities.get(MecanumMath.VelocityDirection.NORTH), 0.001, "Forward mismatch");
+        assertNotEquals(forward, velocities.get(NORTH), 0.001, "Forward mismatch");
         assertNotEquals(strafe, velocities.get(MecanumMath.VelocityDirection.EAST), 0.001, "East mismatch");
         assertNotEquals(angular, velocities.get(MecanumMath.VelocityDirection.ROTATION), 0.001, "Rotation mismatch");
     }
@@ -223,7 +224,7 @@ public class SwerveMathTest {
     private static Map<MecanumMath.VelocityDirection, Double> magnitudeMap(double north, double east, double rotation) {
         EnumMap<MecanumMath.VelocityDirection, Double> map = new EnumMap<>(MecanumMath.VelocityDirection.class);
 
-        map.put(MecanumMath.VelocityDirection.NORTH, north);
+        map.put(NORTH, north);
         map.put(MecanumMath.VelocityDirection.EAST, east);
         map.put(MecanumMath.VelocityDirection.ROTATION, rotation);
 
