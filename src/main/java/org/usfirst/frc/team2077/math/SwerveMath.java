@@ -1,23 +1,28 @@
 package org.usfirst.frc.team2077.math;
 
-import org.apache.commons.math3.fitting.leastsquares.*;
-import org.apache.commons.math3.linear.*;
-import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.util.Pair;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
+import org.usfirst.frc.team2077.common.math.Matrix;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
 import java.util.*;
 
 import static java.lang.Math.*;
+import static org.usfirst.frc.team2077.common.WheelPosition.*;
 
 /**
  * Handle calculating the necessary magnitude and angle for a set of swerve wheels.
  * We may want to find a better equation or come up with our own we like better.
- *
- * Based on pdf found <a href="https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf">here</a>.
- * Forward kinematics from <a href="https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/joe.2014.0241">this paper</a>
+ * <p>
+ *  Inverse kinematics based on pdf found <a href="https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf">here</a>.
+ * </p>
+ * <p>
+ *   Forward kinematics from <a href="https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/joe.2014.0241">this paper</a>
+ *   <p>
+ *     Worth noting is that I'm unsure if the forward kinematics equation used actually has a hard requirement of
+ *     rectangularly positioned wheels.
+ *   </p>
+ * </p>
  *
  * <dl>
  *     <dt>Y</dt>
@@ -36,58 +41,44 @@ public class SwerveMath {
     private static final EnumMap<WheelPosition, Multiplier> WHEEL_MULTIPLIERS = new EnumMap<>(WheelPosition.class);
     private static final EnumMap<WheelPosition, JointKey> WHEEL_TO_SIDES = new EnumMap<>(WheelPosition.class);
     static {
-        WHEEL_TO_SIDES.put(WheelPosition.FRONT_LEFT, new JointKey(RobotSide.FRONT, RobotSide.LEFT));
-        WHEEL_TO_SIDES.put(WheelPosition.BACK_LEFT, new JointKey(RobotSide.BACK, RobotSide.LEFT));
-        WHEEL_MULTIPLIERS.put(WheelPosition.FRONT_LEFT, new Multiplier(-1, 1));
-        WHEEL_MULTIPLIERS.put(WheelPosition.BACK_LEFT, new Multiplier(-1, -1));
+        WHEEL_TO_SIDES.put(FRONT_LEFT, new JointKey(RobotSide.FRONT, RobotSide.LEFT));
+        WHEEL_TO_SIDES.put(BACK_LEFT, new JointKey(RobotSide.BACK, RobotSide.LEFT));
+        WHEEL_MULTIPLIERS.put(FRONT_LEFT, new Multiplier(-1, 1));
+        WHEEL_MULTIPLIERS.put(BACK_LEFT, new Multiplier(-1, -1));
 
-        WHEEL_TO_SIDES.put(WheelPosition.FRONT_RIGHT, new JointKey(RobotSide.FRONT, RobotSide.RIGHT));
-        WHEEL_TO_SIDES.put(WheelPosition.BACK_RIGHT, new JointKey(RobotSide.BACK, RobotSide.RIGHT));
-        WHEEL_MULTIPLIERS.put(WheelPosition.FRONT_RIGHT, new Multiplier(1, 1));
-        WHEEL_MULTIPLIERS.put(WheelPosition.BACK_RIGHT, new Multiplier(1, -1));
+        WHEEL_TO_SIDES.put(FRONT_RIGHT, new JointKey(RobotSide.FRONT, RobotSide.RIGHT));
+        WHEEL_TO_SIDES.put(BACK_RIGHT, new JointKey(RobotSide.BACK, RobotSide.RIGHT));
+        WHEEL_MULTIPLIERS.put(FRONT_RIGHT, new Multiplier(1, 1));
+        WHEEL_MULTIPLIERS.put(BACK_RIGHT, new Multiplier(1, -1));
     }
 
     private static double pythag(double a, double b) {
         return sqrt(pow(a, 2) + pow(b, 2));
     }
 
-    private final RealMatrix forward;
-    private final RealMatrix inverse;
     private double wheelbase, trackWidth, radius;
+    private double halfWheelbase, halfTrackwidth, wDenom;
 
     public SwerveMath(double wheelbase, double trackWidth) {
         setWheelbase(wheelbase);
         setTrackWidth(trackWidth);
-
-        double halfY = wheelbase / 2;
-        double halfX = trackWidth / 2;
-        var positions = WheelPosition.values().length;
-
-        this.inverse = new BlockRealMatrix(new double[positions * 2][3]);
-        int i = 0;
-        for(WheelPosition position : WheelPosition.values()) {
-            var mults = WHEEL_MULTIPLIERS.get(position);
-
-            inverse.setRow(i++, new double[]{1, 0, mults.y * halfY});
-            inverse.setRow(i++, new double[]{0, 1, mults.x * halfX});
-        }
-
-        SingularValueDecomposition dec = new SingularValueDecomposition(inverse);
-        this.forward = dec.getSolver().getInverse();
     }
 
     public void setWheelbase(double wheelbase) {
         this.wheelbase = wheelbase;
+        this.halfWheelbase = wheelbase / 2;
         updateRadius();
     }
 
     public void setTrackWidth(double trackWidth) {
         this.trackWidth = trackWidth;
+        this.halfTrackwidth = trackWidth / 2;
         updateRadius();
     }
 
     private void updateRadius() {
         this.radius = pythag(wheelbase, trackWidth);
+        this.wDenom = pow(wheelbase, 2) + pow(trackWidth, 2);
     }
 
     private EnumMap<RobotSide, Double> createRobotSideValueMap(
@@ -133,10 +124,10 @@ public class SwerveMath {
 
         if(rotation == 0 && north == 0 && strafe == 0) {
             return Map.of(
-                    WheelPosition.FRONT_LEFT, new SwerveTargetValues(0, 0),
-                    WheelPosition.FRONT_RIGHT, new SwerveTargetValues(0, 0),
-                    WheelPosition.BACK_LEFT, new SwerveTargetValues(0, 0),
-                    WheelPosition.BACK_RIGHT, new SwerveTargetValues(0, 0)
+                    FRONT_LEFT, new SwerveTargetValues(0, 0),
+                    FRONT_RIGHT, new SwerveTargetValues(0, 0),
+                    BACK_LEFT, new SwerveTargetValues(0, 0),
+                    BACK_RIGHT, new SwerveTargetValues(0, 0)
             );
         }
 
@@ -153,28 +144,80 @@ public class SwerveMath {
         return targetValues;
     }
 
+    /**
+     * Handles solving for <strong>W<sub>i</sub></strong>.<br>
+     * In regards to<br>
+     * <code>
+     *     W<sub>i</sub> = (-y<sup>r</sup><sub>wi</sub>cos(&delta;<sub>i</sub>) + x<sup>r</sup><sub>wi</sub>sin(&delta;<sub>i</sub>)) / 4((x<sup>r</sup><sub>wi</sub>)<sup>2</sup> + (y<sup>r</sup><sub>wi</sub>)<sup>2</sup>)
+     * </code>
+     * <br><br>
+     * Given <br>
+     * "y<sup>r</sup><sub>wi</sub>" is the Y offset of wheel I<br>
+     * "x<sup>r</sup><sub>wi</sub>" is the X offset of wheel I<br>
+     * "&delta;<sub>i</sub>" is the Angle wheel I<br>
+     *
+     * @param p The position we're calculating for
+     * @param cos cos(&delta;<sub>i</sub>)
+     * @param sin sin(&delta;<sub>i</sub>)
+     * @return W<sub>i</sub>
+     */
+    private double getWFor(WheelPosition p, double cos, double sin) {
+        var mults = WHEEL_MULTIPLIERS.get(p);
+
+        return (
+                ((mults.y * -halfWheelbase * cos) + (mults.x * halfTrackwidth * sin)) /
+                wDenom
+        );
+    }
+
     public Map<MecanumMath.VelocityDirection, Double> velocitiesForTargets(
         Map<WheelPosition, ? extends SwerveModule> targets
     ) {
-        WheelPosition[] values = WheelPosition.values();
+        SwerveModule fl = targets.get(FRONT_LEFT);
+        SwerveModule bl = targets.get(BACK_LEFT);
+        SwerveModule br = targets.get(BACK_RIGHT);
+        SwerveModule fr = targets.get(FRONT_RIGHT);
 
-        var stateMatrix = new BlockRealMatrix(values.length * 2, 1);
-        int idx = 0;
-        for(WheelPosition position : values) {
-            SwerveModule motor = targets.get(position);
-            double velocity = motor.getVelocity();
-            double angle = toRadians(motor.getWheelAngle());
+        // We have to convert our wheel angles to their unit circle equivalent
+        // We go 0 (north) - 360 clockwise
+        // The unit circle goes 0 (east) - 360 counter-clockwise
+        // So -angle inverts to counter-clockwise
+        // and + 90 (un)adjusts to make north 0
+        double flA = toRadians(-fl.getWheelAngle() + 90),
+                blA = toRadians(-bl.getWheelAngle() + 90),
+                brA = toRadians(-br.getWheelAngle() + 90),
+                frA = toRadians(-fr.getWheelAngle() + 90);
 
-            stateMatrix.setEntry(idx++, 0, velocity * cos(angle));
-            stateMatrix.setEntry(idx++, 0, velocity * sin(angle));
-        }
+        double flC = cos(flA), flS = sin(flA);
+        double blC = cos(blA), blS = sin(blA);
+        double brC = cos(brA), brS = sin(brA);
+        double frC = cos(frA), frS = sin(frA);
 
-        var product = forward.multiply(stateMatrix);
+        Matrix pseudoPDotX = new Matrix(new double[][] {
+                {flC / 4, blC / 4, brC / 4, frC / 4},
+                {flS / 4, blS / 4, brS / 4, frS / 4},
+                {getWFor(FRONT_LEFT, flC, flS), getWFor(BACK_LEFT, blC, blS), getWFor(BACK_RIGHT, brC, brS), getWFor(FRONT_RIGHT, frC, frS)},
+        });
+
+        double flV = fl.getVelocity(),
+                blV = bl.getVelocity(),
+                brV = br.getVelocity(),
+                frV = fr.getVelocity();
+
+        Matrix velocities = new Matrix(new double[][] {
+                {flV},
+                {blV},
+                {brV},
+                {frV},
+        });
+
+        Matrix result = pseudoPDotX.multiply(velocities);
 
         return Map.of(
-                MecanumMath.VelocityDirection.NORTH, product.getEntry(0, 0),
-                MecanumMath.VelocityDirection.EAST, product.getEntry(1, 0),
-                MecanumMath.VelocityDirection.ROTATION, toDegrees(product.getEntry(2, 0))
+                MecanumMath.VelocityDirection.NORTH, result.get(0, 1),
+                MecanumMath.VelocityDirection.EAST, result.get(0, 0),
+                // Unit circle is counter-clockwise, we want clockwise
+                MecanumMath.VelocityDirection.ROTATION, -toDegrees(result.get(0, 2))
         );
     }
 
