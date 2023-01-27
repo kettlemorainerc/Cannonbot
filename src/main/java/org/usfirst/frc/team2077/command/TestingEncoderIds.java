@@ -2,7 +2,7 @@ package org.usfirst.frc.team2077.command;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import org.usfirst.frc.team2077.common.commands.RepeatedCommand;
+import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 public class TestingEncoderIds extends RepeatedCommand {

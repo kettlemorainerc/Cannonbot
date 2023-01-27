@@ -9,7 +9,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.motorcontrol.Victor;
 import org.usfirst.frc.team2077.RobotHardware;
-import org.usfirst.frc.team2077.common.commands.RepeatedCommand;
+import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
 public class TestingMotorIds extends RepeatedCommand {
 

@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import org.usfirst.frc.team2077.RobotHardware;
-import org.usfirst.frc.team2077.common.commands.SelfDefinedCommand;
+import org.usfirst.frc.team2077.common.WheelPosition;
+import org.usfirst.frc.team2077.common.command.SelfDefinedCommand;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
@@ -14,7 +15,7 @@ public class CalibrateRotation extends SelfDefinedCommand {
     private SwerveMotor[] hardware;
     private int wheelNumber = 0;
     public CalibrateRotation(RobotHardware hardware) {
-        MecanumMath.WheelPosition[] positionValues = MecanumMath.WheelPosition.values();
+        WheelPosition[] positionValues = WheelPosition.values();
         this.hardware = new SwerveMotor[positionValues.length];
         for(int i = 0; i < positionValues.length; i++){
             this.hardware[i] = hardware.getWheel(positionValues[i]);

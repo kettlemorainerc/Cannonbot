@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
-import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
-
-import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.WheelPosition.*;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
@@ -27,26 +25,35 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     */
 
     public enum MotorPosition{
-        FRONT_RIGHT(NORTH_EAST,1, 2, 1,2),
-        FRONT_LEFT(NORTH_WEST,7, 8, 7,8),
-        BACK_RIGHT(SOUTH_EAST,3, 4, 3,4),
-        BACK_LEFT(SOUTH_WEST,5, 6, 5,6);
+        // MAX_RPM: 5800
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT,1, 2, 1,2, 0,6.67,2,5600),
+        // Max: 5600
+        FRONT_LEFT(WheelPosition.FRONT_LEFT,7, 8, 7,8, 10,6.67,2,5600),
+        // Max: 5700
+        BACK_RIGHT(WheelPosition.BACK_RIGHT,3, 4, 3,4, 11,6.67,2,5600),
+        // Max 5700,
+        BACK_LEFT(WheelPosition.BACK_LEFT,5, 6, 5,6, 12,6.67,2,5600);
 
-        private final MecanumMath.WheelPosition wheelPosition;
-        private final int rotationId;
+        private final WheelPosition wheelPosition;
+        private final int directionId;
         private final int encoderChannelA;
         private final int encoderChannelB;
         private final int magnitudeId;
 
-        private MotorPosition(MecanumMath.WheelPosition wheelPosition, int rotationId, int magnitudeId, int encoderChannelA, int encoderChannelB){
+        private MotorPosition(WheelPosition wheelPosition, int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel, double gearRatio, double radius, double maxRPM){
             this.wheelPosition =  wheelPosition;
             this.rotationId = rotationId;
             this.magnitudeId = magnitudeId;
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
+            this.hallEffectChannel = hallEffectChannel;
+            this.gearRatio = gearRatio;
+            this.radius = radius;
+            this.maxRPM = maxRPM;
+
         }
 
-        public static MotorPosition of(MecanumMath.WheelPosition pos) {
+        public static MotorPosition of(WheelPosition pos) {
             for(MotorPosition drivePos : values()) if (drivePos.wheelPosition == pos) return drivePos;
 
             throw new IllegalArgumentException("No DrivePosition found for wheel position: " + pos);
@@ -166,11 +173,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     boolean clockwiseToTarget;
     @Override public void periodic(){
-
         updateMagnitude();
 
         updateRotation();
-
     }
 
     private void updateMagnitude(){
@@ -239,7 +244,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     @Override
-    public MecanumMath.WheelPosition getWheelPosition() {
+    public WheelPosition getWheelPosition() {
         return null;
     }
 

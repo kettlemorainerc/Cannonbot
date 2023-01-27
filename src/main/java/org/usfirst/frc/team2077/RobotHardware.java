@@ -1,19 +1,17 @@
 package org.usfirst.frc.team2077;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.kauailabs.navx.frc.*;
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.*;
-import org.usfirst.frc.team2077.common.sensors.AngleSensor;
-import org.usfirst.frc.team2077.common.subsystems.*;
+import org.usfirst.frc.team2077.common.sensor.AngleSensor;
+import org.usfirst.frc.team2077.common.subsystem.CANLineSubsystem;
 import org.usfirst.frc.team2077.drivetrain.SwerveChassis;
 import org.usfirst.frc.team2077.subsystem.*;
-import org.usfirst.frc.team2077.drivetrain.SwerveModule;
-import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
-public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SwerveMotor> {
+public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardware<SwerveMotor, SwerveChassis> {
     private final Subsystem HEADING = new Subsystem() {};
     private final Subsystem POSITION = new Subsystem() {};
     private final AbstractChassis CHASSIS;
@@ -50,7 +48,7 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
 
 //    public final CANLineSubsystem.SparkNeo FRONT_LEFT_WHEEL = new CANLineSubsystem.SparkNeo(SparkNeoDriveModule.DrivePosition.FRONT_LEFT);
 
-//    public RotationModule getRotationModule(MecanumMath.WheelPosition position) {
+//    public RotationModule getRotationModule(WheelPosition position) {
 //        //TODO: Place stuff here
 //        return null;
 //    }
@@ -82,8 +80,8 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     }
 
     @Override
-    public AbstractChassis getChassis() {
-        return CHASSIS;
+    public SwerveChassis getChassis() {
+        return null;
     }
 
     @Override
@@ -97,17 +95,17 @@ public class RobotHardware implements org.usfirst.frc.team2077.common.RobotHardw
     }
 
     @Override
-    public SwerveMotor getWheel(MecanumMath.WheelPosition position) {
+    public SwerveMotor getWheel(WheelPosition position) {
         // TODO: Utilise the newly created Victor type in CANLineSubsystem
 
         switch(position) {
-            case NORTH_EAST:
+            case FRONT_RIGHT:
                 return northEast;
-            case SOUTH_EAST:
+            case BACK_RIGHT:
                 return southEast;
-            case SOUTH_WEST:
+            case BACK_LEFT:
                 return southWest;
-            case NORTH_WEST:
+            case FRONT_LEFT:
                 return northWest;
         }
 

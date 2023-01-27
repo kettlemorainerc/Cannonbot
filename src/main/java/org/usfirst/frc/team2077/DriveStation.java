@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.command.*;
 import org.usfirst.frc.team2077.common.*;
-import org.usfirst.frc.team2077.common.commands.*;
+import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 
 /**
@@ -52,15 +52,15 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
-//        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST).rotationMotor));
-//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST).rotationMotor));
+//        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_EAST).rotationMotor));
+//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_WEST).rotationMotor));
+//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_EAST).rotationMotor));
+//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_WEST).rotationMotor));
 //
-//        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_EAST)));
-//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.NORTH_WEST)));
-//        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_EAST)));
-//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(MecanumMath.WheelPosition.SOUTH_WEST)));
+//        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_EAST)));
+//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_WEST)));
+//        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_EAST)));
+//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
 //        bindTechnicalControl(hardware, technicalStick);

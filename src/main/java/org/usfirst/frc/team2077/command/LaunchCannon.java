@@ -2,7 +2,7 @@ package org.usfirst.frc.team2077.command;
 
 import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.*;
-import org.usfirst.frc.team2077.common.commands.*;
+import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.subsystem.*;
 
 public class LaunchCannon extends SelfDefinedCommand {
