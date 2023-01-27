@@ -1,7 +1,7 @@
 package org.usfirst.frc.team2077.subsystem;
 
 
-import org.usfirst.frc.team2077.common.subsystems.CANLineSubsystem;
+import org.usfirst.frc.team2077.common.subsystem.CANLineSubsystem;
 
 public final class Victor extends CANLineSubsystem<edu.wpi.first.wpilibj.motorcontrol.Victor> {
 

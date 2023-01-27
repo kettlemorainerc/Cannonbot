@@ -5,7 +5,7 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import org.usfirst.frc.team2077.RobotHardware;
-import org.usfirst.frc.team2077.common.commands.RepeatedCommand;
+import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
 public class ChangePistonHeight extends RepeatedCommand {
 

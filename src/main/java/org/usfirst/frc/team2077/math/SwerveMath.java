@@ -2,15 +2,11 @@ package org.usfirst.frc.team2077.math;
 
 import org.apache.commons.math3.fitting.leastsquares.*;
 import org.apache.commons.math3.linear.*;
-import org.apache.commons.math3.stat.regression.GLSMultipleLinearRegression;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.util.Pair;
 import org.usfirst.frc.team2077.common.*;
-import org.usfirst.frc.team2077.common.drivetrain.*;
-import org.usfirst.frc.team2077.common.math.Matrix;
+import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
-import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 import java.util.*;
 
@@ -21,6 +17,7 @@ import static java.lang.Math.*;
  * We may want to find a better equation or come up with our own we like better.
  *
  * Based on pdf found <a href="https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf">here</a>.
+ * Forward kinematics from <a href="https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/joe.2014.0241">this paper</a>
  *
  * <dl>
  *     <dt>Y</dt>
@@ -36,31 +33,39 @@ import static java.lang.Math.*;
  * </dl>
  */
 public class SwerveMath {
-    private static final EnumMap<MecanumMath.WheelPosition, Multiplier> WHEEL_MULTIPLIERS = new EnumMap<>(MecanumMath.WheelPosition.class);
-    private static final EnumMap<MecanumMath.WheelPosition, JointKey> WHEEL_TO_SIDES = new EnumMap<>(MecanumMath.WheelPosition.class);
+    private static final EnumMap<WheelPosition, Multiplier> WHEEL_MULTIPLIERS = new EnumMap<>(WheelPosition.class);
+    private static final EnumMap<WheelPosition, JointKey> WHEEL_TO_SIDES = new EnumMap<>(WheelPosition.class);
     static {
-        WHEEL_TO_SIDES.put(MecanumMath.WheelPosition.NORTH_WEST, new JointKey(RobotSide.FRONT, RobotSide.LEFT));
-        WHEEL_TO_SIDES.put(MecanumMath.WheelPosition.SOUTH_WEST, new JointKey(RobotSide.BACK, RobotSide.LEFT));
-        WHEEL_MULTIPLIERS.put(MecanumMath.WheelPosition.NORTH_WEST, new Multiplier(-1, 1));
-        WHEEL_MULTIPLIERS.put(MecanumMath.WheelPosition.SOUTH_WEST, new Multiplier(-1, -1));
+        WHEEL_TO_SIDES.put(WheelPosition.FRONT_LEFT, new JointKey(RobotSide.FRONT, RobotSide.LEFT));
+        WHEEL_TO_SIDES.put(WheelPosition.BACK_LEFT, new JointKey(RobotSide.BACK, RobotSide.LEFT));
+        WHEEL_MULTIPLIERS.put(WheelPosition.FRONT_LEFT, new Multiplier(-1, 1));
+        WHEEL_MULTIPLIERS.put(WheelPosition.BACK_LEFT, new Multiplier(-1, -1));
 
-        WHEEL_TO_SIDES.put(MecanumMath.WheelPosition.NORTH_EAST, new JointKey(RobotSide.FRONT, RobotSide.RIGHT));
-        WHEEL_TO_SIDES.put(MecanumMath.WheelPosition.SOUTH_EAST, new JointKey(RobotSide.BACK, RobotSide.RIGHT));
-        WHEEL_MULTIPLIERS.put(MecanumMath.WheelPosition.NORTH_EAST, new Multiplier(1, 1));
-        WHEEL_MULTIPLIERS.put(MecanumMath.WheelPosition.SOUTH_EAST, new Multiplier(1, -1));
+        WHEEL_TO_SIDES.put(WheelPosition.FRONT_RIGHT, new JointKey(RobotSide.FRONT, RobotSide.RIGHT));
+        WHEEL_TO_SIDES.put(WheelPosition.BACK_RIGHT, new JointKey(RobotSide.BACK, RobotSide.RIGHT));
+        WHEEL_MULTIPLIERS.put(WheelPosition.FRONT_RIGHT, new Multiplier(1, 1));
+        WHEEL_MULTIPLIERS.put(WheelPosition.BACK_RIGHT, new Multiplier(1, -1));
+    }
+
+    private static double pythag(double a, double b) {
+        return sqrt(pow(a, 2) + pow(b, 2));
     }
 
     private final RealMatrix forward;
     private final RealMatrix inverse;
+    private double wheelbase, trackWidth, radius;
 
     public SwerveMath(double wheelbase, double trackWidth) {
+        setWheelbase(wheelbase);
+        setTrackWidth(trackWidth);
+
         double halfY = wheelbase / 2;
         double halfX = trackWidth / 2;
-        var positions = MecanumMath.WheelPosition.values().length;
+        var positions = WheelPosition.values().length;
 
-        inverse = new BlockRealMatrix(new double[positions * 2][3]);
+        this.inverse = new BlockRealMatrix(new double[positions * 2][3]);
         int i = 0;
-        for(MecanumMath.WheelPosition position : MecanumMath.WheelPosition.values()) {
+        for(WheelPosition position : WheelPosition.values()) {
             var mults = WHEEL_MULTIPLIERS.get(position);
 
             inverse.setRow(i++, new double[]{1, 0, mults.y * halfY});
@@ -68,45 +73,94 @@ public class SwerveMath {
         }
 
         SingularValueDecomposition dec = new SingularValueDecomposition(inverse);
-        forward = dec.getSolver().getInverse();
+        this.forward = dec.getSolver().getInverse();
     }
 
-    public Map<MecanumMath.WheelPosition, SwerveTargetValues> targetsForVelocities(
-            Map<MecanumMath.VelocityDirection, Double> targetMagnitudes
+    public void setWheelbase(double wheelbase) {
+        this.wheelbase = wheelbase;
+        updateRadius();
+    }
+
+    public void setTrackWidth(double trackWidth) {
+        this.trackWidth = trackWidth;
+        updateRadius();
+    }
+
+    private void updateRadius() {
+        this.radius = pythag(wheelbase, trackWidth);
+    }
+
+    private EnumMap<RobotSide, Double> createRobotSideValueMap(
+            double forward, double strafe, double rotation
     ) {
-        var speeds = new Array2DRowRealMatrix(new double[][] {
-            {targetMagnitudes.get(MecanumMath.VelocityDirection.NORTH)},
-            {targetMagnitudes.get(MecanumMath.VelocityDirection.EAST)},
-            {targetMagnitudes.get(MecanumMath.VelocityDirection.ROTATION)},
-        }, false);
+        EnumMap<RobotSide, Double> multipliers = new EnumMap<>(RobotSide.class);
 
-        var moduleMatrix = inverse.multiply(speeds);
+        // A
+        multipliers.put(RobotSide.BACK, strafe - rotation * wheelbase / radius);
+        // B
+        multipliers.put(RobotSide.FRONT, strafe + rotation * wheelbase / radius);
+        // C
+        multipliers.put(RobotSide.RIGHT, forward - rotation * trackWidth / radius);
+        // D
+        multipliers.put(RobotSide.LEFT, forward + rotation * trackWidth / radius);
 
-        var ret = new EnumMap<MecanumMath.WheelPosition, SwerveTargetValues>(MecanumMath.WheelPosition.class);
-        int i = 0;
-        System.out.println(moduleMatrix);
-        for(MecanumMath.WheelPosition p : MecanumMath.WheelPosition.values()) {
-            double x = moduleMatrix.getEntry(i++, 0);
-            double y = moduleMatrix.getEntry(i++, 0);
+        return multipliers;
+    }
 
-            double speed = Math.hypot(x, y);
-            double angle = toDegrees(Math.atan2(y / speed, x / speed));
-            if(angle < 0) angle += 360;
+    private SwerveTargetValues wheelTargets(
+            Map<RobotSide, Double> values,
+            RobotSide east,
+            RobotSide north
+    ) {
+        double mag = Math.sqrt(pow(values.get(east), 2) + pow(values.get(north), 2));
+        double ang = toDegrees(atan2(values.get(north), values.get(east)));
 
-            ret.put(p, new SwerveTargetValues(speed, angle));
+        if(Double.isNaN(mag)) mag = 0;
+        if(Double.isNaN(ang)) ang = 0;
+        else if(ang < 0) {
+            ang += 360;
         }
 
-        return ret;
+        return new SwerveTargetValues(mag, ang);
+    }
+
+    public Map<WheelPosition, SwerveTargetValues> targetsForVelocities(
+            Map<MecanumMath.VelocityDirection, Double> targetMagnitudes
+    ) {
+        double north = targetMagnitudes.get(MecanumMath.VelocityDirection.NORTH);
+        double strafe = targetMagnitudes.get(MecanumMath.VelocityDirection.EAST);
+        double rotation = targetMagnitudes.get(MecanumMath.VelocityDirection.ROTATION);
+
+        if(rotation == 0 && north == 0 && strafe == 0) {
+            return Map.of(
+                    WheelPosition.FRONT_LEFT, new SwerveTargetValues(0, 0),
+                    WheelPosition.FRONT_RIGHT, new SwerveTargetValues(0, 0),
+                    WheelPosition.BACK_LEFT, new SwerveTargetValues(0, 0),
+                    WheelPosition.BACK_RIGHT, new SwerveTargetValues(0, 0)
+            );
+        }
+
+        // Some mix of north/strafe/rotation
+        Map<RobotSide, Double> valueMap = createRobotSideValueMap(north, strafe, rotation);
+
+        Map<WheelPosition, SwerveTargetValues> targetValues = new EnumMap<>(WheelPosition.class);
+
+        WHEEL_TO_SIDES.forEach((position, sides) -> targetValues.put(position, wheelTargets(valueMap, sides.east, sides.north)));
+
+        double max = targetValues.values().stream().mapToDouble(SwerveTargetValues::getMagnitude).max().orElse(0d);
+        if(max > 1) targetValues.values().forEach(val -> val.setMagnitude(val.getMagnitude() / max));
+
+        return targetValues;
     }
 
     public Map<MecanumMath.VelocityDirection, Double> velocitiesForTargets(
-        Map<MecanumMath.WheelPosition, ? extends SwerveModule> targets
+        Map<WheelPosition, ? extends SwerveModule> targets
     ) {
-        MecanumMath.WheelPosition[] values = MecanumMath.WheelPosition.values();
+        WheelPosition[] values = WheelPosition.values();
 
         var stateMatrix = new BlockRealMatrix(values.length * 2, 1);
         int idx = 0;
-        for(MecanumMath.WheelPosition position : values) {
+        for(WheelPosition position : values) {
             SwerveModule motor = targets.get(position);
             double velocity = motor.getVelocity();
             double angle = toRadians(motor.getWheelAngle());

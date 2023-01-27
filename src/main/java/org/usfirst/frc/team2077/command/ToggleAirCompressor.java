@@ -2,7 +2,7 @@ package org.usfirst.frc.team2077.command;
 
 import edu.wpi.first.wpilibj.Relay;
 import org.usfirst.frc.team2077.RobotHardware;
-import org.usfirst.frc.team2077.common.commands.SelfDefinedCommand;
+import org.usfirst.frc.team2077.common.command.SelfDefinedCommand;
 import org.usfirst.frc.team2077.subsystem.AirCompressor;
 import org.usfirst.frc.team2077.subsystem.Cannon;
 

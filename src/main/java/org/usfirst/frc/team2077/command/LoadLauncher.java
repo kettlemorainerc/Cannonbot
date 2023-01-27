@@ -1,7 +1,7 @@
 package org.usfirst.frc.team2077.command;
 
 import org.usfirst.frc.team2077.*;
-import org.usfirst.frc.team2077.common.commands.*;
+import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.subsystem.*;
 
 public class LoadLauncher extends SelfDefinedCommand {

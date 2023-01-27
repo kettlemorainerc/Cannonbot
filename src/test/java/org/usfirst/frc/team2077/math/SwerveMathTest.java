@@ -6,6 +6,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import org.junit.jupiter.api.*;
+import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
@@ -113,19 +114,19 @@ public class SwerveMathTest {
         );
     }
 
-    private static Map<MecanumMath.WheelPosition, TestModule> mapOf(
+    private static Map<WheelPosition, TestModule> mapOf(
             TestModule frontLeft, TestModule frontRight,
             TestModule backLeft, TestModule backRight
     ) {
         return Map.of(
-                MecanumMath.WheelPosition.NORTH_WEST, frontLeft,
-                MecanumMath.WheelPosition.NORTH_EAST, frontRight,
-                MecanumMath.WheelPosition.SOUTH_WEST, backLeft,
-                MecanumMath.WheelPosition.SOUTH_EAST, backRight
+                WheelPosition.FRONT_LEFT, frontLeft,
+                WheelPosition.FRONT_RIGHT, frontRight,
+                WheelPosition.BACK_LEFT, backLeft,
+                WheelPosition.BACK_RIGHT, backRight
         );
     }
 
-    private static Map<MecanumMath.WheelPosition, TestModule> mapOf(
+    private static Map<WheelPosition, TestModule> mapOf(
         double frontLeftMag, double frontLeftAngle, double frontRightMag, double frontRightAng,
         double backLeftMag, double backLeftAng, double backRightMag, double backRightAng
     ) {
@@ -156,10 +157,10 @@ public class SwerveMathTest {
             double forward, double strafe, double angular
     ) {
         var velocities = math.velocitiesForTargets(Map.of(
-                MecanumMath.WheelPosition.NORTH_WEST, frontLeft,
-                MecanumMath.WheelPosition.NORTH_EAST, frontRight,
-                MecanumMath.WheelPosition.SOUTH_EAST, backRight,
-                MecanumMath.WheelPosition.SOUTH_WEST, backLeft
+                WheelPosition.FRONT_LEFT, frontLeft,
+                WheelPosition.FRONT_RIGHT, frontRight,
+                WheelPosition.BACK_RIGHT, backRight,
+                WheelPosition.BACK_LEFT, backLeft
         ));
 
         assertNotEquals(forward, velocities.get(MecanumMath.VelocityDirection.NORTH), 0.001, "Forward mismatch");
@@ -168,13 +169,13 @@ public class SwerveMathTest {
     }
 
     private static void assertMagnitudes(double north, double east, double rotation, double expectedMag, double expectedAng) {
-        Map<MecanumMath.WheelPosition, SwerveTargetValues> values = math.targetsForVelocities(magnitudeMap(north, east, rotation));
+        Map<WheelPosition, SwerveTargetValues> values = math.targetsForVelocities(magnitudeMap(north, east, rotation));
 
         values.forEach((k, val) -> assertTargets(k, val, expectedMag, expectedAng));
     }
 
     private static void assertMagnitudesAngle(double north, double east, double rotation, double expectedAng) {
-        Map<MecanumMath.WheelPosition, SwerveTargetValues> values = math.targetsForVelocities(magnitudeMap(north, east, rotation));
+        Map<WheelPosition, SwerveTargetValues> values = math.targetsForVelocities(magnitudeMap(north, east, rotation));
 
         values.forEach((k, val) -> assertEquals(expectedAng, val.getAngle(), .1, k + " angle unexpected"));
     }
@@ -197,20 +198,20 @@ public class SwerveMathTest {
     }
     
     private static void assertMapValues(
-        Map<MecanumMath.WheelPosition, SwerveTargetValues> values,
+        Map<WheelPosition, SwerveTargetValues> values,
         double frontLeftMag, double frontLeftAng,
         double backLeftMag, double backLeftAng,
         double frontRightMag, double frontRightAng,
         double backRightMag, double backRightAng
     ) {
-        assertTargets(MecanumMath.WheelPosition.NORTH_WEST, values.get(MecanumMath.WheelPosition.NORTH_WEST), frontLeftMag, frontLeftAng);
-        assertTargets(MecanumMath.WheelPosition.SOUTH_WEST, values.get(MecanumMath.WheelPosition.SOUTH_WEST), backLeftMag, backLeftAng);
-        assertTargets(MecanumMath.WheelPosition.NORTH_EAST, values.get(MecanumMath.WheelPosition.NORTH_EAST), frontRightMag, frontRightAng);
-        assertTargets(MecanumMath.WheelPosition.SOUTH_EAST, values.get(MecanumMath.WheelPosition.SOUTH_EAST), backRightMag, backRightAng);
+        assertTargets(WheelPosition.FRONT_LEFT, values.get(WheelPosition.FRONT_LEFT), frontLeftMag, frontLeftAng);
+        assertTargets(WheelPosition.BACK_LEFT, values.get(WheelPosition.BACK_LEFT), backLeftMag, backLeftAng);
+        assertTargets(WheelPosition.FRONT_RIGHT, values.get(WheelPosition.FRONT_RIGHT), frontRightMag, frontRightAng);
+        assertTargets(WheelPosition.BACK_RIGHT, values.get(WheelPosition.BACK_RIGHT), backRightMag, backRightAng);
     }
 
     private static void assertTargets(
-        MecanumMath.WheelPosition k,
+        WheelPosition k,
         SwerveTargetValues targets,
         double magnitude,
         double angle
@@ -248,7 +249,7 @@ public class SwerveMathTest {
         }
 
         @Override
-        public MecanumMath.WheelPosition getWheelPosition() {
+        public WheelPosition getWheelPosition() {
             return null;
         }
 
