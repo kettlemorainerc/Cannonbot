@@ -17,7 +17,6 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     private static final double WHEELBASE = 20.375; // inches
     private static final double TRACK_WIDTH = 25.5; // inches
     private static final double WHEEL_RADIUS = 4.0; // inches
-    private static final double EAST_ADJUSTMENT = .65;
 
 //    private static final RotationMotor directionMotor = new RotationMotor();
 
@@ -59,19 +58,23 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     @Override
     protected void updatePosition() {
         velocitySet = getVelocityCalculated();
-        // TODO: update velocityMeasured by reading rotation motors and driveModule motors and calculating the current velocity
+        velocityMeasured = math.velocitiesForTargets(driveModule);
 
-        // Technically whichever following todo isn't returned by AbstractChassis#getPosition is optional
-        // TODO: update positionSet using velocity set
-        // TODO: update positionMeasured using velocity measured
+        positionSet.moveRelative(
+                velocitySet.get(NORTH) * timeSinceLastUpdate,
+                velocitySet.get(EAST) * timeSinceLastUpdate,
+                velocitySet.get(ROTATION) * timeSinceLastUpdate
+        );
+        positionMeasured.moveRelative(
+                velocityMeasured.get(NORTH) * timeSinceLastUpdate,
+                velocityMeasured.get(EAST) * timeSinceLastUpdate,
+                velocityMeasured.get(ROTATION) * timeSinceLastUpdate
+        );
     }
 
     public static WheelPosition LOGGED_POSITION = WheelPosition.FRONT_RIGHT;
     @Override
     protected void updateDriveModules() {
-        // The following is the BIG one
-        // TODO: Convert targetVelocity to target magnitude and wheel angle
-
         Map<WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(targetVelocity);
 
         wheelTargets.forEach( (key, value) -> {
@@ -84,9 +87,6 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
             motor.setTargetAngle(value.getAngle());
             motor.setMagnitude(value.getMagnitude());
         });
-
-        // TODO: update each rotation motor to the target wheel angle (setTargetAngle)
-        // TODO: update each driveModule motor to the target magnitude (setPercent)
     }
 
     @Override
