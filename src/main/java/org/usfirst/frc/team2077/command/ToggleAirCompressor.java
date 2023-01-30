@@ -1,10 +1,8 @@
 package org.usfirst.frc.team2077.command;
 
-import edu.wpi.first.wpilibj.Relay;
 import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.command.SelfDefinedCommand;
 import org.usfirst.frc.team2077.subsystem.AirCompressor;
-import org.usfirst.frc.team2077.subsystem.Cannon;
 
 public class ToggleAirCompressor extends SelfDefinedCommand {
     private boolean finished = true;
@@ -12,7 +10,7 @@ public class ToggleAirCompressor extends SelfDefinedCommand {
     private final AirCompressor airCompressor;
 
     public ToggleAirCompressor(RobotHardware hardware) {
-        this.airCompressor = hardware.AIRCOMPRESSOR;
+        this.airCompressor = hardware.airCompressor;
         this.addRequirements(airCompressor);
     }
 

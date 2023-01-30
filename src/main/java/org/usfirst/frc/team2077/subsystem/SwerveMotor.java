@@ -1,12 +1,13 @@
 package org.usfirst.frc.team2077.subsystem;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.common.WheelPosition;
@@ -39,10 +40,14 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         private final int encoderChannelA;
         private final int encoderChannelB;
         private final int magnitudeId;
+        private final int hallEffectChannel;
+        private final double gearRatio;
+        private final double radius;
+        private final double maxRPM;
 
         private MotorPosition(WheelPosition wheelPosition, int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel, double gearRatio, double radius, double maxRPM){
             this.wheelPosition =  wheelPosition;
-            this.rotationId = rotationId;
+            this.directionId = directionId;
             this.magnitudeId = magnitudeId;
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
@@ -91,10 +96,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private String angleKey;
 
-    public SwerveMotor(int rotationId, int magnitudeId, int encoderChannelA, int encoderChannelB){
+    public SwerveMotor(int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel){
         angleKey = "angle_key";
 
-        directionMotor = new TalonSRX(rotationId);
+        directionMotor = new TalonSRX(directionId);
 
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
@@ -107,7 +112,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public SwerveMotor(MotorPosition motorPosition){
-        this(motorPosition.rotationId, motorPosition.magnitudeId, motorPosition.encoderChannelA, motorPosition.encoderChannelB);
+        this(motorPosition.directionId, motorPosition.magnitudeId, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.hallEffectChannel);
         position = motorPosition;
         angleKey = motorPosition.name() + "_Angle";
     }
@@ -153,8 +158,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     }
 
-    public void setRotationPercent(double percent){
-        rotationMotor.set(percent);
+    public void setDirectionPercent(double percent){
+        directionMotor.set(TalonSRXControlMode.PercentOutput, percent);
     }
 
     public double getWheelAngle() {
@@ -210,7 +215,6 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void setDirectionMotor(double percent){
-//        if(rotationMotor.getMotorOutputPercent() != percent){
         previousDirectionMotorPercent = percent;
         directionMotor.set(ControlMode.PercentOutput, percent);
     }

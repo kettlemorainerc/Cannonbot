@@ -26,22 +26,22 @@ public abstract class HardwareRequirements<DriveModule, Chassis extends Abstract
     protected Subsystem makeHeading() {return new Subsystem() {};}
     protected Subsystem makePosition() {return new Subsystem() {};}
 
-    public Subsystem getHeading() {
+    public final Subsystem getHeading() {
         return heading;
     }
 
-    public Subsystem getPosition() {
+    public final Subsystem getPosition() {
         return position;
     }
 
     public abstract Chassis getChassis();
     public abstract DriveModule getWheel(WheelPosition pos);
 
-    public AngleSensor getAngleSensor() {
+    public final AngleSensor getAngleSensor() {
         return angleSensor;
     }
 
-    public AHRS getNavX() {
+    public final AHRS getNavX() {
         return navX;
     }
 }

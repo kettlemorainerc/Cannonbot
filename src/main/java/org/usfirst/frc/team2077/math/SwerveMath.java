@@ -1,7 +1,7 @@
 package org.usfirst.frc.team2077.math;
 
 import org.usfirst.frc.team2077.common.*;
-import org.usfirst.frc.team2077.common.drivetrain.MecanumMath;
+import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.math.Matrix;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
@@ -116,11 +116,11 @@ public class SwerveMath {
     }
 
     public Map<WheelPosition, SwerveTargetValues> targetsForVelocities(
-            Map<MecanumMath.VelocityDirection, Double> targetMagnitudes
+            Map<VelocityDirection, Double> targetMagnitudes
     ) {
-        double north = targetMagnitudes.get(MecanumMath.VelocityDirection.NORTH);
-        double strafe = targetMagnitudes.get(MecanumMath.VelocityDirection.EAST);
-        double rotation = targetMagnitudes.get(MecanumMath.VelocityDirection.ROTATION);
+        double north = targetMagnitudes.get(VelocityDirection.FORWARD);
+        double strafe = targetMagnitudes.get(VelocityDirection.STRAFE);
+        double rotation = targetMagnitudes.get(VelocityDirection.ROTATION);
 
         if(rotation == 0 && north == 0 && strafe == 0) {
             return Map.of(
@@ -170,7 +170,7 @@ public class SwerveMath {
         );
     }
 
-    public Map<MecanumMath.VelocityDirection, Double> velocitiesForTargets(
+    public Map<VelocityDirection, Double> velocitiesForTargets(
         Map<WheelPosition, ? extends SwerveModule> targets
     ) {
         SwerveModule fl = targets.get(FRONT_LEFT);
@@ -214,10 +214,10 @@ public class SwerveMath {
         Matrix result = pseudoPDotX.multiply(velocities);
 
         return Map.of(
-                MecanumMath.VelocityDirection.NORTH, result.get(0, 1),
-                MecanumMath.VelocityDirection.EAST, result.get(0, 0),
+                VelocityDirection.FORWARD, result.get(0, 1),
+                VelocityDirection.STRAFE, result.get(0, 0),
                 // Unit circle is counter-clockwise, we want clockwise
-                MecanumMath.VelocityDirection.ROTATION, -toDegrees(result.get(0, 2))
+                VelocityDirection.ROTATION, -toDegrees(result.get(0, 2))
         );
     }
 

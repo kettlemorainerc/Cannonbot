@@ -9,7 +9,7 @@ public class LoadLauncher extends SelfDefinedCommand {
     private final Cannon cannon;
 
     public LoadLauncher(RobotHardware hardware) {
-        this.cannon = hardware.CANNON;
+        this.cannon = hardware.cannon;
         this.addRequirements(cannon);
     }
 

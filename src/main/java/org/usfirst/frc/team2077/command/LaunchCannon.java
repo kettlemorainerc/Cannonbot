@@ -11,7 +11,7 @@ public class LaunchCannon extends SelfDefinedCommand {
     private final JoystickButton button;
 
     public LaunchCannon(RobotHardware hardware, JoystickButton boundTo) {
-        this.cannon = hardware.CANNON;
+        this.cannon = hardware.cannon;
         this.button = boundTo;
     }
 
@@ -25,7 +25,7 @@ public class LaunchCannon extends SelfDefinedCommand {
 
     @Override public void execute() {
         cannon.launch();
-        finished = !button.get();
+        finished = !button.getAsBoolean();
     }
 
     @Override public void end(boolean interrupted) {

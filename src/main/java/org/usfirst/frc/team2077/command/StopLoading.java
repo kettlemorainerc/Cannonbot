@@ -9,7 +9,7 @@ public class StopLoading extends SelfDefinedCommand {
     private final Cannon cannon;
 
     public StopLoading(RobotHardware hardware) {
-        this.cannon = hardware.CANNON;
+        this.cannon = hardware.cannon;
     }
 
     @Override public boolean isFinished() {
