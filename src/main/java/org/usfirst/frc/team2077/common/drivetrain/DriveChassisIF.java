@@ -26,20 +26,6 @@ Notes on units:
 
 public interface DriveChassisIF extends Subsystem {
 
-    void moveAbsolute(double north, double east, double heading);
-
-    void moveAbsolute(double north, double east);
-
-    void rotateAbsolute(double clockwise);
-
-    void moveRelative(double north, double east, double heading);
-
-    void moveRelative(double north, double east);
-
-    void rotateRelative(double clockwise);
-
-    void setPosition(double north, double east, double heading);
-
     Position getPosition();
 
 
@@ -71,16 +57,6 @@ public interface DriveChassisIF extends Subsystem {
      * @param linearDeceleration In units of G.
      */
     public void setGLimits(double linearAcceleration, double linearDeceleration);
-
-    /**
-     * Set maximum allowable acceleration and deceleration.
-     * Used to control wheelspin or lockup, depending on surface traction.
-     * @param linearAcceleration In units of G (acceleration of gravity).
-     * @param linearDeceleration In units of G.
-     * @param rotationalAcceleration Tangential acceleration units of G.
-     * @param rotationalDeceleration Tangential deceleration units of G.
-     */
-    //public void setGLimits(double linearAcceleration, double linearDeceleration, double rotationalAcceleration, double rotationalDeceleration);
 
     /**
      * Acceleration and deceleration limits in units inches/second/second and degrees/second/second.

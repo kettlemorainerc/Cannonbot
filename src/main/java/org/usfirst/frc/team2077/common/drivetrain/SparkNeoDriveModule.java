@@ -76,6 +76,10 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
 
     }
 
+    public SparkNeoDriveModule(WheelPosition position) {
+        this(DrivePosition.forWheelPosition(position));
+    }
+
     public DrivePosition getPosition() {
         return position;
     }

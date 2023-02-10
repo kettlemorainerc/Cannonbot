@@ -154,35 +154,6 @@ public abstract class AbstractChassis<DriveModule> extends SubsystemBase impleme
         return stuff;
     }
 
-    @Override public void moveAbsolute(double north, double east, double heading) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void moveAbsolute(double north, double east) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void rotateAbsolute(double clockwise) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void moveRelative(double north, double east, double heading) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void moveRelative(double north, double east) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void rotateRelative(double clockwise) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override public void setPosition(double north, double east, double heading) {
-        positionSet.set(north, east, heading);
-        positionMeasured.set(north, east, heading);
-    }
-
     @Override public Position getPosition() {
         return positionSet.copy();
     }
