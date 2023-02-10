@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.math;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.math.Matrix;

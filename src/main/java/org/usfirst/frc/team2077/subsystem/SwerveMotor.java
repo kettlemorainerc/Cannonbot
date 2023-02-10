@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
@@ -27,10 +28,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public enum MotorPosition {
         // MAX_RPM: 5800
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 1, 2, 1, 2, 0, 6.67, 2, 5600), // Max: 5600
-        FRONT_LEFT(WheelPosition.FRONT_LEFT, 7, 8, 7, 8, 10, 6.67, 2, 5600), // Max: 5700
-        BACK_RIGHT(WheelPosition.BACK_RIGHT, 3, 4, 3, 4, 11, 6.67, 2, 5600), // Max 5700,
-        BACK_LEFT(WheelPosition.BACK_LEFT, 5, 6, 5, 6, 12, 6.67, 2, 5600);
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 1, 2, 1, 2, 0, 6.67, 2, 5800),
+        // Max: 5600
+        FRONT_LEFT(WheelPosition.FRONT_LEFT, 7, 8, 7, 8, 10, 6.67, 2, 5600),
+        // Max: 5700
+        BACK_RIGHT(WheelPosition.BACK_RIGHT, 3, 4, 3, 4, 11, 6.67, 2, 5700),
+        // Max 5700,
+        BACK_LEFT(WheelPosition.BACK_LEFT, 5, 6, 5, 6, 12, 6.67, 2, 5700);
 
         private final WheelPosition wheelPosition;
         private final int directionId;
@@ -41,6 +45,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         private final double gearRatio;
         private final double radius;
         private final double maxRPM;
+        private final double wheelCircumference;
 
         private MotorPosition(
               WheelPosition wheelPosition,
@@ -62,6 +67,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             this.gearRatio = gearRatio;
             this.radius = radius;
             this.maxRPM = maxRPM;
+            this.wheelCircumference = (2 * Math.PI * radius);
 
         }
 
@@ -77,10 +83,14 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private static final double Ivalue = 0.0;
     private static final double Dvalue = 0.0;
 
-    private static final double DEAD_ANGLE = 0.5;
+    private static final double deccelGuess = 1.0 / 30.0;
+
+    private static final double DEAD_ANGLE = 1;
     private static final double SPEED_REDUCTION = 0.3;
 
     private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); // encoder counts multiplied by the gear ratio
+
+    public static boolean rotateFirst = false;
 
     public final TalonSRX directionMotor;
     public final Encoder encoder;
@@ -145,7 +155,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     @Override public void setTargetMagnitude(double magnitude) {
-        if(this.position == MotorPosition.BACK_RIGHT && magnitude > 0) System.out.printf("[target magnitude=%s]%n", magnitude);
+//        if(this.position == MotorPosition.BACK_RIGHT && magnitude > 0) System.out.printf("[target magnitude=%s]%n", magnitude);
         this.targetMagnitude = magnitude;
     }
 
@@ -156,12 +166,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         double angleDifference = getAngleDifference(currentWheelAngle, targetAngle);
 
         flipMagnitude = false;
-        if(Math.abs(angleDifference) > 90 &&
+        if(Math.abs(angleDifference) > 90
            // We're not sure if this actually makes a difference
            // Is supposed prevent turning around if already heading in one direction
-           (
-                 previousDirectionMotorPercent == 0 || Math.signum(previousDirectionMotorPercent) != Math.signum(angleDifference)
-           )) {
+//           (
+//                 previousDirectionMotorPercent == 0 || Math.signum(previousDirectionMotorPercent) != Math.signum(angleDifference)
+//           )
+        ) {
             targetAngle -= 180;
             flipMagnitude = true;
         }
@@ -187,6 +198,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         return angle;
     }
 
+    public boolean isAtTarget(){
+        return Math.abs(getAngleDifference(getWheelAngle(), targetAngle)) < DEAD_ANGLE;
+    }
+
     public static MotorPosition LOGGED_POSITION = MotorPosition.FRONT_RIGHT;
 
     boolean clockwiseToTarget;
@@ -195,9 +210,19 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         updateMagnitude();
 
         updateRotation();
+
+//        SmartDashboard.putNumber(angleKey, getVelocity());
     }
 
     private void updateMagnitude() {
+
+        if(rotateFirst){
+//             if(Math.abs(getAngleDifference(targetAngle, getWheelAngle())) > DEAD_ANGLE) {
+            magnitudeMotor.set(0);
+            System.out.println("waiting for angle");
+//            }
+            return;
+        }
 
         double magnitude = targetMagnitude * SPEED_REDUCTION;
 
@@ -208,7 +233,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updateRotation() {
-        if(this.targetMagnitude == 0) {
+        if (this.targetMagnitude == 0) {
             setDirectionMotor(0);
             return;
         }
@@ -217,12 +242,23 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         double angleDifference = getAngleDifference(currentAngle, targetAngle);
 
         double speed = Math.signum(angleDifference);
-        if(Math.abs(angleDifference) < 15) {
-            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
 
-            speed = Math.min(Math.abs(speed), 0.05) * Math.signum(speed);
+        double stoppingAngle = Math.abs(speed) / (2 * deccelGuess); // a =  1 / (2 * 15)
+
+        if (stoppingAngle > Math.abs(angleDifference)){
+
+            double rotationDirection = Math.signum(speed);
+
+            speed -= speed / (2 * Math.abs(angleDifference));
+
+            speed = Math.min(Math.abs(speed), 0.1) * rotationDirection;
+
         }
-        //
+//        if(Math.abs(angleDifference) < 15) {
+//            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
+//
+//
+//        }
         if(Math.abs(angleDifference) < DEAD_ANGLE) speed = 0.0;
 
         setDirectionMotor(speed);
@@ -237,10 +273,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         return position;
     }
 
-    private double getAngleDifference(
-          double from,
-          double to
-    ) {
+    private double getAngleDifference(double from, double to) {
         double angleDifference = from - to;
 
         if(Math.abs(angleDifference) > 180) {
@@ -255,11 +288,16 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public double getMaximumSpeed() {
-        return (position.maxRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
+        double rawRPM = position.maxRPM;
+        double rawWheelRPM = rawRPM / position.gearRatio;
+        double rawWheelRPS = rawWheelRPM / 60;
+        double rawVelocity = rawWheelRPS * position.wheelCircumference;
+
+        return rawVelocity;
     }
 
     @Override public void setVelocity(double velocity) {
-
+        setMagnitude(velocity / getMaximumSpeed());
     }
 
     @Override public WheelPosition getWheelPosition() {
@@ -268,10 +306,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     @Override public double getVelocity() {
 
-        double rawRPM = magnitudeMotor.getEncoder()
-                                      .getVelocity();
+        double rawRPM = magnitudeMotor.getEncoder().getVelocity();
 
-        return (rawRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
+        double rawWheelRPM = rawRPM / position.gearRatio;
+        double rawWheelRPS = rawWheelRPM / 60;
+        double rawDistance = rawWheelRPS * position.wheelCircumference;
+
+        return rawDistance;
 
     }
 
@@ -283,4 +324,26 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     }
 
+    //Checks if motors are all facing towards target, if so removes the rotate before move tag.
+    public static void checkDirection(){
+
+        if(!rotateFirst) return;
+
+        boolean atDirection = true;
+        RobotHardware hardware = RobotHardware.getInstance();
+
+        for(MotorPosition position : MotorPosition.values()){
+            SwerveMotor module = hardware.getWheel(position.wheelPosition);
+            atDirection &= module.isAtTarget();
+        }
+
+        if(atDirection){
+            rotateFirst = false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "" + getVelocity();
+    }
 }

@@ -1,6 +1,8 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 
+import com.ctre.phoenix.led.TwinkleAnimation;
+import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
@@ -44,17 +46,39 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         this.maximumRotation = 1;
         this.maximumSpeed =  this.driveModules.values()
                 .stream()
-                .map(DriveModuleIF::getMaximumSpeed)
+                .map( e -> {
+                    Double max = e.getMaximumSpeed();
+                    System.out.printf("[%s=%s]", e.getPosition(), max);
+                    return max;
+                })
                 .min(Comparator.naturalOrder())
                 .orElseThrow();;
-        this.minimumRotation = 0;
+        System.out.println();
+
+//        maximumSpeed
+
+//        TestSwerve()
+        Map<WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(
+            Map.of(
+                FORWARD, 0.0, STRAFE, 0.0, ROTATION, 1.0
+            )
+        );
+
+        Map<WheelPosition, TestSwerve> map = new EnumMap<>(WheelPosition.class);
+        wheelTargets.forEach(
+            (k, v) -> {
+                map.put(k, new TestSwerve(v.getAngle(), v.getMagnitude() * maximumSpeed));
+            }
+        );
+
+        maximumRotation = math.velocitiesForTargets(map).get(ROTATION);
+
         this.minimumSpeed =  this.maximumSpeed * 0.1;
     }
 
     public SwerveChassis(HardwareRequirements<SwerveMotor, SwerveChassis> hardware) {
         this(hardware, Clock::getSeconds);
     }
-
 
     @Override
     protected void updatePosition() {
@@ -81,12 +105,8 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         wheelTargets.forEach( (key, value) -> {
             SwerveMotor motor = this.driveModules.get(key);
 
-//            if(key == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
-////                System.out.println("[position=" + LOGGED_POSITION + "][targets=" + value + ']');
-//            }
-
             motor.setTargetAngle(value.getAngle());
-            motor.setMagnitude(value.getMagnitude());
+            motor.setVelocity(value.getMagnitude() * maximumSpeed);
         });
     }
 
@@ -109,5 +129,63 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
         targetVelocity.put(ROTATION, clockwise);
         this.accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
+    }
+
+    private static class TestSwerve implements SwerveModule{
+
+        private final double wheelAngle;
+        private final double velocity;
+
+        TestSwerve(double wheelAngle, double velocity) {
+            this.wheelAngle = wheelAngle;
+            this.velocity = velocity;
+        }
+
+        @Override
+        public double getWheelAngle() {
+            return wheelAngle;
+        }
+
+        @Override
+        public double getVelocity() {
+            return velocity;
+        }
+
+        // region Ignored Things
+        @Override
+        public double getMaximumSpeed() {
+            return 0;
+        }
+
+        @Override
+        public void setVelocity(double velocity) {
+
+        }
+
+        @Override
+        public WheelPosition getWheelPosition() {
+            return null;
+        }
+
+        @Override
+        public double getDistance() {
+            return 0;
+        }
+
+        @Override
+        public void resetDistance() {
+
+        }
+
+        @Override
+        public void setTargetDegrees(double degrees) {
+
+        }
+
+        @Override
+        public void setTargetMagnitude(double magnitude) {
+
+        }
+        // endregion
     }
 }
