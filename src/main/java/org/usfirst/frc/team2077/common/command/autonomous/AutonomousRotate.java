@@ -135,4 +135,10 @@ public class AutonomousRotate extends CommandBase {
         return Math.sqrt(a * a + b * b);
     }
 
+    private static void printStuff(String... stuff) {
+        for(int i = 0 ; i < stuff.length; i += 2) {
+            System.out.printf("[%s=%s]", stuff[i], stuff[i + 1]);
+        }
+        System.out.println();
+    }
 }
