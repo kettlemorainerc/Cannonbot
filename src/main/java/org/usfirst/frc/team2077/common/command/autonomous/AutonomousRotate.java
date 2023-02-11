@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AutonomousRotate extends CommandBase {
 
     private static final double DEACCELERATION = 175.0; // degrees/s/s
+    private static final double TICK = 1.0 / 50.0;
 
     private double rotation = 0;
     private double rotationalMovement = 0;
@@ -58,6 +59,7 @@ public class AutonomousRotate extends CommandBase {
 
         angularSpeed = (double) chassis.getMaximumVelocity().get(VelocityDirection.ROTATION);
 
+//        angularSpeed = Math.min(angularSpeed, Math.abs(rotation));
     }
 
     private double getDeltaTime(){
@@ -69,35 +71,59 @@ public class AutonomousRotate extends CommandBase {
 
     @Override
     public void execute() {
+        // region degenerate
+
+
+        double angleDiff = (rotationalMovement - rotation);
+
+        SmartDashboard.putNumber("MoveData", angleDiff);
+
+        if(Math.abs(angleDiff) > 180) angleDiff -= Math.signum(angleDiff) * 360;
+
+        boolean hasToMoveClockwise = angleDiff <= 0;
+
+        boolean finished = hasToMoveClockwise != clockwise;
+
+        System.out.println(angularSpeed + ": " + (finished? "finished" : "waiting"));
+
+        if(finished){
+
+            chassis.halt();
+            return;
+
+        }
+
+        //endregion degenerate
+
 
 //        System.out.println(chassis.driveModules);
         Map<VelocityDirection, Double> currentVelocity = chassis.getVelocityMeasured();
+        Map<VelocityDirection, Double> targetVelocity = chassis.getVelocitySet();
+
 
         double dt = getDeltaTime();
 
         double rotationalVelocity = currentVelocity.get(VelocityDirection.ROTATION);//double check this (ask david)
 
-        System.out.print(currentVelocity);
-
         rotationalMovement += rotationalVelocity * dt;
 
         SwerveMotor.checkDirection();
 //
-        double angleDiff = (rotationalMovement - rotation);
-        if(Math.abs(angleDiff) > 180) angleDiff -= Math.signum(angleDiff) * 360;
+        angleDiff = (rotation - rotationalMovement);
+//        if(Math.abs(angleDiff) > 180) angleDiff -= Math.signum(angleDiff) * 360;
 
+        // in/s^2 * (s^2)/(50)^2
 //        SmartDashboard.putNumber("MoveData", angleDiff);
 
         double deccel = Math.pow(angularSpeed, 2) / (2 * Math.abs(angleDiff));
 
-//        System.out.println(angleDiff);
+        angularSpeed = Math.max(angularSpeed - deccel * dt, 10);
 
-//        SmartDashboard.putNumber("MoveSpeed", angularSpeed);
-//        SmartDashboard.putNumber("MoveData", angleDiff);
-
-        angularSpeed = Math.max(angularSpeed - deccel, 1);
+//        System.out.println(angularSpeed);
 
         double targetRotate = angularSpeed;
+
+//        printStuff("measured velocity", rotationalVelocity, "set as", targetRotate, "target", targetVelocity.get(VelocityDirection.ROTATION));
 
 //        System.out.printf("[forward set=%s][strafe set=%s]%n", targetForward, targetStrafe);
 
@@ -122,7 +148,8 @@ public class AutonomousRotate extends CommandBase {
 
 //        finished = Math.signum(north - northMovement) != Math.signum(north);
 
-        return finished;
+//        return finished;
+        return false;
     }
 
     @Override
@@ -135,7 +162,7 @@ public class AutonomousRotate extends CommandBase {
         return Math.sqrt(a * a + b * b);
     }
 
-    private static void printStuff(String... stuff) {
+    private static void printStuff(Object... stuff) {
         for(int i = 0 ; i < stuff.length; i += 2) {
             System.out.printf("[%s=%s]", stuff[i], stuff[i + 1]);
         }

@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 import static org.usfirst.frc.team2077.common.VelocityDirection.*;
 
 public class SwerveChassis extends AbstractChassis<SwerveMotor> {
-    private static final double WHEELBASE = 20.375; // inches
-    private static final double TRACK_WIDTH = 25.5; // inches
-    private static final double WHEEL_RADIUS = 4.0; // inches
+    private static final double WHEELBASE = 25.5; // inches
+    private static final double TRACK_WIDTH = 20.375; // inches
+    private static final double WHEEL_RADIUS = 2.0; // inches
 
     //    private static final RotationMotor directionMotor = new RotationMotor();
 
@@ -100,12 +100,19 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
               maximumRotation
         );
 
+        System.out.printf("[target rotate=%s]", targetVelocity.get(ROTATION));
         wheelTargets.forEach((key, value) -> {
             SwerveMotor motor = this.driveModules.get(key);
 
             motor.setTargetAngle(value.getAngle());
-            motor.setVelocity(value.getMagnitude() * maximumSpeed);
+            double targetVelocity = value.getMagnitude() * maximumSpeed;
+            if(Math.abs(value.getMagnitude()) > 0.0001) {
+                targetVelocity = Math.max(targetVelocity, minimumSpeed);
+            }
+            motor.setVelocity(targetVelocity);
+            System.out.printf("[%s mag=%s]", key, value.getMagnitude());
         });
+        System.out.println();
     }
 
     @Override public void setVelocity(
