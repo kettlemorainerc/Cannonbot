@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj2.command.*;
 import java.awt.*;
 
 public class Cannon extends SubsystemBase {
-    private final Relay launchValve;
-    private final Solenoid loadValve;
+    public final Relay launchValve;
+    public final Solenoid loadValve;
     private final PressureSensor pressure;
 
-    private boolean allowedToFire = false;
+    private static final Relay.Value OPEN = Relay.Value.kOn;
+    private static final Relay.Value CLOSE = Relay.Value.kOff;
 
 //    private Solenoid targetedSolenoid;
 
@@ -44,6 +45,7 @@ public class Cannon extends SubsystemBase {
         this.loadValve = loadValve;
 //        launchValve.setPulseDuration(.03);
         this.pressure = pressure;
+        launchValve.set(CLOSE);
     }
 
     public double getCurrentPressure() {return pressure.getCurrentPressure();}
@@ -53,19 +55,19 @@ public class Cannon extends SubsystemBase {
         double currentPressure = pressure.getCurrentPressure();
         for(int i=0; i < FiringTankPressures.values().length; i++) {
             if(FiringTankPressures.values()[i].pressure_voltage <= currentPressure){
-                if(FiringTankPressures.values()[i].pressure_warning_color == Color.GREEN || FiringTankPressures.values()[i].pressure_warning_color == Color.ORANGE){
-                    allowedToFire = true;
-                }else{
-                    allowedToFire = false;
-                }
+//                if(FiringTankPressures.values()[i].pressure_warning_color == Color.GREEN || FiringTankPressures.values()[i].pressure_warning_color == Color.ORANGE){
+//                    allowedToFire = true;
+//                }else{
+//                    allowedToFire = false;
+//                }
                 System.out.println("pressure_description = "+FiringTankPressures.values()[i].pressure_description);
             }
         }
     }
     public boolean isLoadOpen() {return loadValve.get();}
-    public boolean isLaunchOpen() {return launchValve.get() == Relay.Value.kOn;}
+    public boolean isLaunchOpen() {return launchValve.get() == OPEN;}
 
-    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(Relay.Value.kOff);}
+    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(CLOSE);}
     public void closeLoad() {if(isLoadOpen()) loadValve.set(false);}
 
     private void openLaunch() {
@@ -73,10 +75,10 @@ public class Cannon extends SubsystemBase {
         
         if(isLoadOpen()) {
             closeLoad();
-            schedule(() -> launchValve.set(Relay.Value.kOn), 2);
+            schedule(() -> launchValve.set(OPEN), 2);
         } else if(!isLaunchOpen()) {
 //            launchValve.startPulse();
-            launchValve.set(Relay.Value.kOn);
+            launchValve.set(OPEN);
         }
     }
 

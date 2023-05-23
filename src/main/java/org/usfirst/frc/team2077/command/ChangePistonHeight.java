@@ -20,7 +20,7 @@ public class ChangePistonHeight extends RepeatedCommand {
     }
 
     private final TalonSRX screw;
-    private final double motorSpeed = 0.75;
+    private final double motorSpeed = 1.0;//;0.75;
     private PistonDirection direction;
 
     //TODO: make sure this works;

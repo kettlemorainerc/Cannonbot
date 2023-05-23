@@ -86,8 +86,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private static final double deccelGuess = 1.0 / 30.0;
 
     private static final double DEAD_ANGLE = 1;
-    private static final double SPEED_REDUCTION = 0.3;
-
+    private static final double SPEED_REDUCTION = 1;
     private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); // encoder counts multiplied by the gear ratio
 
     public static boolean rotateFirst = false;

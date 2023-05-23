@@ -59,6 +59,7 @@ public class AutonomousRotate extends CommandBase {
 
         angularSpeed = (double) chassis.getMaximumVelocity().get(VelocityDirection.ROTATION);
 
+//        angularSpeed /= 50.0; //Rough estimate of tick rate for the
 //        angularSpeed = Math.min(angularSpeed, Math.abs(rotation));
     }
 
@@ -72,7 +73,6 @@ public class AutonomousRotate extends CommandBase {
     @Override
     public void execute() {
         // region degenerate
-
 
         double angleDiff = (rotationalMovement - rotation);
 
@@ -105,19 +105,18 @@ public class AutonomousRotate extends CommandBase {
 
         double rotationalVelocity = currentVelocity.get(VelocityDirection.ROTATION);//double check this (ask david)
 
-        rotationalMovement += rotationalVelocity * dt;
+        rotationalMovement += rotationalVelocity;
 
         SwerveMotor.checkDirection();
 //
         angleDiff = (rotation - rotationalMovement);
 //        if(Math.abs(angleDiff) > 180) angleDiff -= Math.signum(angleDiff) * 360;
 
-        // in/s^2 * (s^2)/(50)^2
 //        SmartDashboard.putNumber("MoveData", angleDiff);
 
         double deccel = Math.pow(angularSpeed, 2) / (2 * Math.abs(angleDiff));
 
-        angularSpeed = Math.max(angularSpeed - deccel * dt, 10);
+        angularSpeed = Math.max(angularSpeed - deccel, 10);
 
 //        System.out.println(angularSpeed);
 

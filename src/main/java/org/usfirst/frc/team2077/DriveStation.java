@@ -51,6 +51,9 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
+        useCommand(technicalStick, 4, new ZeroSwerveMotors(hardware));
+
+
 //        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_EAST).rotationMotor));
 //        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_WEST).rotationMotor));
 //        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_EAST).rotationMotor));
@@ -71,18 +74,24 @@ public class DriveStation {
 
     /** Bind technical driver button commands here */
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
-        JoystickButton load = new JoystickButton(secondary, 1);
-        JoystickButton stopLoad = new JoystickButton(secondary, 5);
-        JoystickButton launch = new JoystickButton(secondary, 2);
+//        JoystickButton load = new JoystickButton(secondary, 1);
+//        JoystickButton stopLoad = new JoystickButton(secondary, 5);
+//        JoystickButton launch = new JoystickButton(secondary, 2);
+
+        new OpenRelay(hardware.cannon.launchValve, true).bind( new JoystickButton(secondary, 17) );
+        new OpenRelay(hardware.cannon.launchValve, false).bind( new JoystickButton(secondary, 21) );
+        new OpenRelay(hardware.cannon.loadValve, false).bind( new JoystickButton(secondary, 18) );
+        new OpenRelay(hardware.cannon.loadValve, true).bind( new JoystickButton(secondary, 22) );
+
 
         JoystickButton pistonUp = new JoystickButton(secondary, 12);
         JoystickButton pistonDown = new JoystickButton(secondary, 16);
         JoystickButton toggleAirCompressor = new JoystickButton(secondary, 6);
         JoystickButton calibrateRotation = new JoystickButton(secondary, 3);
 
-        new LoadLauncher(hardware).bind(load);
-        new StopLoading(hardware).bind(stopLoad);
-        new LaunchCannon(hardware, launch).bind(launch);
+//        new LoadLauncher(hardware).bind(load);
+//        new StopLoading(hardware).bind(stopLoad);
+//        new LaunchCannon(hardware, launch).bind(launch);
         new ToggleAirCompressor(hardware).bind(toggleAirCompressor);
 
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
