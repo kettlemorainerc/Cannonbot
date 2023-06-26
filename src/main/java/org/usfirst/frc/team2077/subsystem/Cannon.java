@@ -7,106 +7,53 @@ import edu.wpi.first.wpilibj2.command.*;
 import java.awt.*;
 
 public class Cannon extends SubsystemBase {
+
     public final Relay launchValve;
     public final Solenoid loadValve;
+
     private final PressureSensor pressure;
 
     private static final Relay.Value OPEN = Relay.Value.kOn;
     private static final Relay.Value CLOSE = Relay.Value.kOff;
 
-//    private Solenoid targetedSolenoid;
 
     private int delay;
     private Runnable task;
 
-    enum FiringTankPressures {//MUST BE IN ORDER BY VOLTAGE
-        EMPTY(2.0, "empty, it's safe to put away", Color.GREEN),
-        PSI_10(2, "ready to fire short range", Color.ORANGE),
-        PSI_11(2, "ready to fire short range", Color.ORANGE),
-        PSI_15(2, "pressing up for normal shot", Color.ORANGE),
-        PSI_20(2, "ready for a normal shot", Color.ORANGE),
-        PSI_30(2, "tank is over-pressure, leak before firing", Color.RED),
-        PSI_40(2, "tank is over-pressure, do not fire, system should lock button", Color.RED);
-
-        public final double pressure_voltage;
-        public final String pressure_description;
-        public final Color pressure_warning_color;
-
-        FiringTankPressures(double voltage, String message, Color tankSafetyColor){
-            pressure_voltage = voltage;
-            pressure_description = message;
-            pressure_warning_color = tankSafetyColor;
-        }
-
-    }
-
     public Cannon(Solenoid loadValve, Relay launchValve, PressureSensor pressure) {
         this.launchValve = launchValve;
         this.loadValve = loadValve;
-//        launchValve.setPulseDuration(.03);
+
         this.pressure = pressure;
         launchValve.set(CLOSE);
     }
 
     public double getCurrentPressure() {return pressure.getCurrentPressure();}
-    public void updateActionsOnPressureByVoltage() {
-        //Determine Enum
-//        this.allowedToFire
-        double currentPressure = pressure.getCurrentPressure();
-        for(int i=0; i < FiringTankPressures.values().length; i++) {
-            if(FiringTankPressures.values()[i].pressure_voltage <= currentPressure){
-//                if(FiringTankPressures.values()[i].pressure_warning_color == Color.GREEN || FiringTankPressures.values()[i].pressure_warning_color == Color.ORANGE){
-//                    allowedToFire = true;
-//                }else{
-//                    allowedToFire = false;
-//                }
-                System.out.println("pressure_description = "+FiringTankPressures.values()[i].pressure_description);
-            }
-        }
-    }
+
     public boolean isLoadOpen() {return loadValve.get();}
     public boolean isLaunchOpen() {return launchValve.get() == OPEN;}
 
-    public void closeLaunch() {if(isLaunchOpen()) launchValve.set(CLOSE);}
-    public void closeLoad() {if(isLoadOpen()) loadValve.set(false);}
+    public void closeLaunch() { launchValve.set(CLOSE);}
+    public void closeLoad() { loadValve.set(true);}
 
     private void openLaunch() {
-        if(this.delay > 0) return;
-        
-        if(isLoadOpen()) {
-            closeLoad();
-            schedule(() -> launchValve.set(OPEN), 2);
-        } else if(!isLaunchOpen()) {
-//            launchValve.startPulse();
-            launchValve.set(OPEN);
-        }
+        launchValve.set(OPEN);
     }
 
     private void openLoad() {
-        if(this.delay > 0) return;
-
-        if(isLaunchOpen()) {
-            closeLaunch();
-            schedule(() -> loadValve.set(true), 2);
-        } else if(!isLoadOpen()) {
-            System.out.println("Opening load valve");
-            loadValve.set(true);
-        }
+        loadValve.set(false);
     }
 
     public void load() {
         openLoad();
-    }
-
-    public void stopLoading() {
-        closeLoad();
+        closeLaunch();
     }
 
     public void launch() {
-        updateActionsOnPressureByVoltage();
-//        if(allowedToFire){
-            openLaunch();
-//        }
+        openLaunch();
+        closeLoad();
+
+        schedule( () -> load(), 25);
     }
 
     @Override public void periodic() {

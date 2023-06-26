@@ -55,14 +55,8 @@ public class DriveStation {
 
 
 //        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_WEST).rotationMotor));
-//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_WEST).rotationMotor));
-//
+
 //        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_EAST)));
-//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_WEST)));
-//        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_EAST)));
-//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
@@ -76,13 +70,9 @@ public class DriveStation {
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
 //        JoystickButton load = new JoystickButton(secondary, 1);
 //        JoystickButton stopLoad = new JoystickButton(secondary, 5);
-//        JoystickButton launch = new JoystickButton(secondary, 2);
+        JoystickButton launch = new JoystickButton(secondary, 2);
 
-        new OpenRelay(hardware.cannon.launchValve, true).bind( new JoystickButton(secondary, 17) );
-        new OpenRelay(hardware.cannon.launchValve, false).bind( new JoystickButton(secondary, 21) );
-        new OpenRelay(hardware.cannon.loadValve, false).bind( new JoystickButton(secondary, 18) );
-        new OpenRelay(hardware.cannon.loadValve, true).bind( new JoystickButton(secondary, 22) );
-
+//        new OpenRelay(hardware.cannon.launchValve, true).bind( new JoystickButton(secondary, 17) );
 
         JoystickButton pistonUp = new JoystickButton(secondary, 12);
         JoystickButton pistonDown = new JoystickButton(secondary, 16);
@@ -91,7 +81,7 @@ public class DriveStation {
 
 //        new LoadLauncher(hardware).bind(load);
 //        new StopLoading(hardware).bind(stopLoad);
-//        new LaunchCannon(hardware, launch).bind(launch);
+        new LaunchCannon(hardware, launch).bind(launch);
         new ToggleAirCompressor(hardware).bind(toggleAirCompressor);
 
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
