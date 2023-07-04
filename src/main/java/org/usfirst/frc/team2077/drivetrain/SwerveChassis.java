@@ -42,11 +42,15 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         math = new SwerveMath(WHEELBASE, TRACK_WIDTH);
 
         this.maximumRotation = 1;
-        this.maximumSpeed =  this.driveModules.values()
-                .stream()
-                .map(DriveModuleIF::getMaximumSpeed)
-                .min(Comparator.naturalOrder())
-                .orElseThrow();;
+
+        this.maximumSpeed = SwerveMotor.MAX_RPM;
+
+//        this.maximumSpeed = this.driveModules.values()
+//                .stream()
+//                .map(SwerveMotor::getMaximumSpeed)
+//                .min(Comparator.naturalOrder())
+//                .orElseThrow();
+
         this.minimumRotation = 0;
         this.minimumSpeed =  this.maximumSpeed * 0.1;
     }
@@ -86,7 +90,12 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
 //            }
 
             motor.setTargetAngle(value.getAngle());
-            motor.setMagnitude(value.getMagnitude());
+
+            double speed = value.getMagnitude() * this.maximumSpeed;
+
+            if(Math.abs(speed) < 0.01) speed = 0;
+
+            motor.setTargetMagnitude(speed);
         });
     }
 

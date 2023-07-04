@@ -3,8 +3,9 @@ package org.usfirst.frc.team2077.subsystem;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.BetterCanSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,24 +14,16 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
+import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
-    /* This is, essentially, what the public enum below does
-    public static class MotorPosition {
-      public static MotorPosition FRONT_RIGHT = new MotorPosition();
-      public static MotorPosition FRONT_LEFT = new MotorPosition();
-      public static MotorPosition BACK_RIGHT = new MotorPosition();
-      public static MotorPosition BACK_LEFT = new MotorPosition();
-    }
-    */
-
     public enum MotorPosition {
-        // MAX_RPM: 5800
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 1, 2, 1, 2, 0, 6.67, 2, 5600), // Max: 5600
-        FRONT_LEFT(WheelPosition.FRONT_LEFT, 7, 8, 7, 8, 10, 6.67, 2, 5600), // Max: 5700
-        BACK_RIGHT(WheelPosition.BACK_RIGHT, 3, 4, 3, 4, 11, 6.67, 2, 5600), // Max 5700,
-        BACK_LEFT(WheelPosition.BACK_LEFT, 5, 6, 5, 6, 12, 6.67, 2, 5600);
+        //MAX 5800
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 1, 2, 1, 2, 0), // Max: 5600
+        FRONT_LEFT(WheelPosition.FRONT_LEFT, 7, 8, 7, 8, 10), // Max: 5700
+        BACK_RIGHT(WheelPosition.BACK_RIGHT, 3, 4, 3, 4, 11), // Max 5700,
+        BACK_LEFT(WheelPosition.BACK_LEFT, 5, 6, 5, 6, 12);
 
         private final WheelPosition wheelPosition;
         private final int directionId;
@@ -38,20 +31,14 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         private final int encoderChannelB;
         private final int magnitudeId;
         private final int hallEffectChannel;
-        private final double gearRatio;
-        private final double radius;
-        private final double maxRPM;
 
-        private MotorPosition(
+        MotorPosition(
               WheelPosition wheelPosition,
               int directionId,
               int magnitudeId,
               int encoderChannelA,
               int encoderChannelB,
-              int hallEffectChannel,
-              double gearRatio,
-              double radius,
-              double maxRPM
+              int hallEffectChannel
         ) {
             this.wheelPosition = wheelPosition;
             this.directionId = directionId;
@@ -59,10 +46,6 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             this.encoderChannelA = encoderChannelA;
             this.encoderChannelB = encoderChannelB;
             this.hallEffectChannel = hallEffectChannel;
-            this.gearRatio = gearRatio;
-            this.radius = radius;
-            this.maxRPM = maxRPM;
-
         }
 
         public static MotorPosition of(WheelPosition pos) {
@@ -73,33 +56,39 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     }
 
+    public static final double MAX_RPM = 5600;
+
     private static final double Pvalue = 1.0;
     private static final double Ivalue = 0.0;
     private static final double Dvalue = 0.0;
 
-    private static final double DEAD_ANGLE = 0.5;
-    private static final double SPEED_REDUCTION = 0.3;
+    private static final double PERCENT_OF_MAX_SPEED = 0.3;
+
+    private static final double GEAR_RATIO = 6.67;
+
+    private static final double WHEEL_RADIUS = 2; //in
+    private static final double WHEEL_CIRCUMFERENCE = (2 * Math.PI * WHEEL_RADIUS);
 
     private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); // encoder counts multiplied by the gear ratio
 
     public final TalonSRX directionMotor;
     public final Encoder encoder;
 
-    private final CANSparkMax magnitudeMotor;
+    private final BetterCanSparkMax magnitudeMotor;
 
     private double targetAngle = 135, targetMagnitude = 0;
 
-    private double previousDirectionMotorPercent = 0;
-
     private boolean flipMagnitude;
-
-    private double lastError = 0.0;
-    private double errorAccum = 0.0;
 
     private Timer time = new Timer();
     private double lastTime = 0.0;
     private MotorPosition position;
     private DigitalInput hallEffectSensor;
+
+    private PIDController pid = new PIDController(0, 0, 0);
+
+    private static SmartDashNumber p = new SmartDashNumber("P in PID", 0.0, true);
+    private static SmartDashNumber i = new SmartDashNumber("l in PID", 0.0, true);
 
     private String angleKey;
 
@@ -116,12 +105,18 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
-        magnitudeMotor = new CANSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
+        magnitudeMotor = new BetterCanSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
+
+        p.onChange(this::updatePID);
 
         this.register();
 
         hallEffectSensor = new DigitalInput(hallEffectChannel);
 
+    }
+
+    private void updatePID(){
+        pid.setPID(p.get(), i.get(), 0.0);
     }
 
     public SwerveMotor(MotorPosition motorPosition) {
@@ -136,16 +131,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         angleKey = motorPosition.name() + "_Angle";
     }
 
-    public void setMagnitude(double magnitude) {
-        setTargetMagnitude(magnitude);
-    }
-
     @Override public void setTargetDegrees(double degrees) {
         setTargetAngle(degrees);
     }
 
     @Override public void setTargetMagnitude(double magnitude) {
-        if(this.position == MotorPosition.BACK_RIGHT && magnitude > 0) System.out.printf("[target magnitude=%s]%n", magnitude);
         this.targetMagnitude = magnitude;
     }
 
@@ -156,12 +146,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         double angleDifference = getAngleDifference(currentWheelAngle, targetAngle);
 
         flipMagnitude = false;
-        if(Math.abs(angleDifference) > 90 &&
-           // We're not sure if this actually makes a difference
-           // Is supposed prevent turning around if already heading in one direction
-           (
-                 previousDirectionMotorPercent == 0 || Math.signum(previousDirectionMotorPercent) != Math.signum(angleDifference)
-           )) {
+        if(Math.abs(angleDifference) > 90) {
             targetAngle -= 180;
             flipMagnitude = true;
         }
@@ -189,8 +174,6 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public static MotorPosition LOGGED_POSITION = MotorPosition.FRONT_RIGHT;
 
-    boolean clockwiseToTarget;
-
     @Override public void periodic() {
         updateMagnitude();
 
@@ -199,37 +182,43 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private void updateMagnitude() {
 
-        double magnitude = targetMagnitude * SPEED_REDUCTION;
+        double magnitude = targetMagnitude * PERCENT_OF_MAX_SPEED;
 
-        if(flipMagnitude) magnitude *= -1;
-
-        magnitudeMotor.set(magnitude);
+        if(flipMagnitude) magnitude = -magnitude;
+        magnitudeMotor.setTargetVelocity(magnitude);
 
     }
 
     private void updateRotation() {
-        if(this.targetMagnitude == 0) {
-            setDirectionMotor(0);
-            return;
-        }
 
         double currentAngle = getWheelAngle();
         double angleDifference = getAngleDifference(currentAngle, targetAngle);
 
-        double speed = Math.signum(angleDifference);
-        if(Math.abs(angleDifference) < 15) {
-            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
+        double percent = -pid.calculate(angleDifference);
 
-            speed = Math.min(Math.abs(speed), 0.05) * Math.signum(speed);
-        }
-        //
-        if(Math.abs(angleDifference) < DEAD_ANGLE) speed = 0.0;
+        setDirectionMotor(percent);
 
-        setDirectionMotor(speed);
+//        if(this.targetMagnitude == 0) {
+//            setDirectionMotor(0);
+//            return;
+//        }
+//
+//        double currentAngle = getWheelAngle();
+//        double angleDifference = getAngleDifference(currentAngle, targetAngle);
+//
+//        double speed = Math.signum(angleDifference);
+//        if(Math.abs(angleDifference) < 15) {
+//            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
+//
+//            speed = Math.min(Math.abs(speed), 0.05) * Math.signum(speed);
+//        }
+//        //
+//        if(Math.abs(angleDifference) < DEAD_ANGLE) speed = 0.0;
+//
+//        setDirectionMotor(speed);
     }
 
     private void setDirectionMotor(double percent) {
-        previousDirectionMotorPercent = percent;
         directionMotor.set(ControlMode.PercentOutput, percent);
     }
 
@@ -255,12 +244,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public double getMaximumSpeed() {
-        return (position.maxRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
+        return (MAX_RPM / GEAR_RATIO) / (60 / WHEEL_CIRCUMFERENCE);
     }
 
-    @Override public void setVelocity(double velocity) {
-
-    }
+    @Override public void setVelocity(double velocity) {}
 
     @Override public WheelPosition getWheelPosition() {
         return null;
@@ -271,7 +258,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         double rawRPM = magnitudeMotor.getEncoder()
                                       .getVelocity();
 
-        return (rawRPM / position.gearRatio) / (60 / (2 * Math.PI * position.radius));
+        return (rawRPM / GEAR_RATIO) / (60 / WHEEL_CIRCUMFERENCE);
 
     }
 

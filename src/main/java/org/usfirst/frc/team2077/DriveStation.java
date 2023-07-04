@@ -28,7 +28,7 @@ public class DriveStation {
     private static final int NUMPAD_PORT = 5;
 
     private final DriveStick driveStick;
-//    private final Joystick technicalStick;
+    private final Joystick technicalStick;
 
     public DriveStation(RobotHardware hardware) {
         /** Set the driver's control method this MUST be a {@link DriveStick} implementation */
@@ -38,7 +38,7 @@ public class DriveStation {
 
         /** Set the technical control method. This can be any {@link Joystick} implementation */
 //        technicalStick = getTechnicalJoystick();
-//        technicalStick = getNumpad();
+        technicalStick = getNumpad();
 
         bind(hardware);
     }
@@ -62,7 +62,7 @@ public class DriveStation {
 //        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
-//        bindTechnicalControl(hardware, technicalStick);
+        bindTechnicalControl(hardware, technicalStick);
     }
 
     /** Bind primary driver's button commands here */

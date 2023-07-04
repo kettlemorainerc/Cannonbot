@@ -2,6 +2,7 @@ package org.usfirst.frc.team2077.command;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
@@ -33,10 +34,14 @@ public class ChangePistonHeight extends RepeatedCommand {
     @Override
     public void initialize() {
         screw.set(ControlMode.PercentOutput, motorSpeed * direction.getDirection());
+
+
     }
 
     @Override
-    public void execute() {}
+    public void execute() {
+        SmartDashboard.putNumber("linear actuator voltage", screw.getBusVoltage());
+    }
 
     @Override
     public void end(boolean interrupted) {
