@@ -51,15 +51,12 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
+//        useCommand(technicalStick, 4, new ZeroSwerveMotors(hardware));
+
+
 //        useCommand(technicalStick, 18, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 17, new TestingMotorIds(hardware.getWheel(WheelPosition.NORTH_WEST).rotationMotor));
-//        useCommand(technicalStick, 22, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_EAST).rotationMotor));
-//        useCommand(technicalStick, 21, new TestingMotorIds(hardware.getWheel(WheelPosition.SOUTH_WEST).rotationMotor));
-//
+
 //        useCommand(technicalStick, 18, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_EAST)));
-//        useCommand(technicalStick, 17, new TestingEncoderIds(hardware.getWheel(WheelPosition.NORTH_WEST)));
-//        useCommand(technicalStick, 22, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_EAST)));
-//        useCommand(technicalStick, 21, new TestingEncoderIds(hardware.getWheel(WheelPosition.SOUTH_WEST)));
 
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
@@ -71,23 +68,28 @@ public class DriveStation {
 
     /** Bind technical driver button commands here */
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
-        JoystickButton load = new JoystickButton(secondary, 1);
-        JoystickButton stopLoad = new JoystickButton(secondary, 5);
+//        JoystickButton load = new JoystickButton(secondary, 1);
+//        JoystickButton stopLoad = new JoystickButton(secondary, 5);
         JoystickButton launch = new JoystickButton(secondary, 2);
+
+//        new OpenRelay(hardware.cannon.launchValve, true).bind( new JoystickButton(secondary, 17) );
 
         JoystickButton pistonUp = new JoystickButton(secondary, 12);
         JoystickButton pistonDown = new JoystickButton(secondary, 16);
         JoystickButton toggleAirCompressor = new JoystickButton(secondary, 6);
-        JoystickButton calibrateRotation = new JoystickButton(secondary, 3);
+//        JoystickButton calibrateRotation = new JoystickButton(secondary, 3);
 
-        new LoadLauncher(hardware).bind(load);
-        new StopLoading(hardware).bind(stopLoad);
+        new BindableRotate(hardware, -1).bind(new JoystickButton(secondary, 9));
+        new BindableRotate(hardware, 1).bind(new JoystickButton(secondary, 10));
+
+//        new LoadLauncher(hardware).bind(load);
+//        new StopLoading(hardware).bind(stopLoad);
         new LaunchCannon(hardware, launch).bind(launch);
         new ToggleAirCompressor(hardware).bind(toggleAirCompressor);
 
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(pistonDown);
-        new CalibrateRotation(hardware).bind(calibrateRotation);
+//        new CalibrateRotation(hardware).bind(calibrateRotation);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */

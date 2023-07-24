@@ -28,6 +28,7 @@ public class CardinalMovement extends CommandBase {
 
     @Override public void execute() {
         if(DriverStation.isAutonomous()) return;
+
         double north = -stick.getNorth();
         double east = stick.getEast();
 

@@ -18,8 +18,8 @@ public class RotationMovement extends CommandBase {
     }
 
     @Override public void execute() {
-
         if(DriverStation.isAutonomous()) return;
+
         chassis.setRotationPercent(stick.getRotation());
     }
 

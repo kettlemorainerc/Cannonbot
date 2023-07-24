@@ -1,0 +1,46 @@
+package org.usfirst.frc.team2077.drivetrain;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.math.controller.PIDController;
+import org.usfirst.frc.team2077.util.SmartDashNumber;
+
+public class DriveSparkMax {
+
+    private static final double p = 0.0;
+    private static final double i = 0.0;
+    private static final double d = 0.0;
+
+    private final CANSparkMax sparkMax;
+    private final PIDController pid;
+
+    private SmartDashNumber smartdashP = new SmartDashNumber("P for Drive", 0.0, true);
+    private SmartDashNumber smartdashI = new SmartDashNumber("I for Drive", 0.0, true);
+
+    public DriveSparkMax(int deviceId){
+        this(deviceId, CANSparkMaxLowLevel.MotorType.kBrushless);
+    }
+
+    public DriveSparkMax(int deviceId, CANSparkMaxLowLevel.MotorType type) {
+        sparkMax = new CANSparkMax(deviceId, type);
+        pid = new PIDController(p, i, d);
+        pid.setSetpoint(0.0);
+
+        smartdashP.onChange(this::updatePID);
+        smartdashI.onChange(this::updatePID);
+    }
+
+    private void updatePID(){
+        pid.setPID(smartdashP.get(), smartdashI.get(), 0);
+    }
+
+    public void setVelocity(double target, double current){
+        double percent = pid.calculate(current - target);
+        if(Math.abs(percent) > 1) percent = Math.signum(percent);
+        sparkMax.set(percent);
+    }
+
+    public double getRPM(){
+        return sparkMax.getEncoder().getVelocity();
+    }
+}

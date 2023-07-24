@@ -16,7 +16,7 @@ public class LaunchCannon extends SelfDefinedCommand {
     }
 
     @Override public boolean isFinished() {
-        return finished;
+        return true;
     }
 
     @Override public void initialize() {
@@ -24,12 +24,13 @@ public class LaunchCannon extends SelfDefinedCommand {
     }
 
     @Override public void execute() {
+//        System.out.println("pressed");
         cannon.launch();
-        finished = !button.getAsBoolean();
+//        finished = !button.getAsBoolean();
     }
 
     @Override public void end(boolean interrupted) {
-        System.out.println("Finished launch cannon");
-        cannon.closeLaunch();
+//        cannon.load();
+//        System.out.println("released");
     }
 }

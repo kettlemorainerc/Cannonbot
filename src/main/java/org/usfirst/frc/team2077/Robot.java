@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.command.AutonomousPIDedMove;
 import org.usfirst.frc.team2077.common.command.Move;
+import org.usfirst.frc.team2077.common.command.autonomous.AutonomousMove;
+import org.usfirst.frc.team2077.common.command.autonomous.AutonomousRotate;
 
 public class Robot extends TimedRobot {
     private RobotHardware hardware;
@@ -22,9 +24,11 @@ public class Robot extends TimedRobot {
      * When you click the "Autonomous" option in driver station
      */
     @Override public void autonomousInit() {
-        Command move = new AutonomousPIDedMove(hardware,45,100);
+//        AutonomousRotate move = new AutonomousRotate(hardware,90);
+//       Move move = new Move(hardware, 0, 0, 90);
+//        AccelerationTesting move = new AccelerationTesting(hardware, 20, 0);
 
-        move.schedule();
+//        move.schedule();
     }
 
     /**

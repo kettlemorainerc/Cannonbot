@@ -9,6 +9,13 @@ import org.usfirst.frc.team2077.subsystem.*;
 public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChassis> {
     private final SwerveChassis chassis;
 
+    private static RobotHardware instance = null;
+
+    public static RobotHardware getInstance() {
+        if(instance == null) instance = new RobotHardware();
+        return instance;
+    }
+
     public final Cannon cannon;
     public final AirCompressor airCompressor;
     public final TalonSRX piston = new TalonSRX(9);
@@ -19,6 +26,9 @@ public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChass
     public final SwerveMotor southWest = new SwerveMotor(SwerveMotor.MotorPosition.BACK_LEFT);
 
     public RobotHardware() {
+
+        instance = this;
+
         chassis = new SwerveChassis(this); // new MecanumChassis(this);
 
         airCompressor = new AirCompressor(1);

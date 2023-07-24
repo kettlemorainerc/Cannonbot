@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.math;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.math.Matrix;
@@ -8,6 +9,7 @@ import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 import java.util.*;
 
 import static java.lang.Math.*;
+import static org.usfirst.frc.team2077.common.VelocityDirection.*;
 import static org.usfirst.frc.team2077.common.WheelPosition.*;
 
 /**
@@ -118,9 +120,9 @@ public class SwerveMath {
     public Map<WheelPosition, SwerveTargetValues> targetsForVelocities(
             Map<VelocityDirection, Double> targetMagnitudes
     ) {
-        double north = targetMagnitudes.get(VelocityDirection.FORWARD);
-        double strafe = targetMagnitudes.get(VelocityDirection.STRAFE);
-        double rotation = targetMagnitudes.get(VelocityDirection.ROTATION);
+        double north = targetMagnitudes.get(FORWARD);
+        double strafe = targetMagnitudes.get(STRAFE);
+        double rotation = targetMagnitudes.get(ROTATION);
 
         if(rotation == 0 && north == 0 && strafe == 0) {
             return Map.of(
@@ -142,6 +144,17 @@ public class SwerveMath {
         if(max > 1) targetValues.values().forEach(val -> val.setMagnitude(val.getMagnitude() / max));
 
         return targetValues;
+    }
+
+    public Map<WheelPosition, SwerveTargetValues> targetsForVelocities(
+          Map<VelocityDirection, Double> targetMagnitudes,
+          double maxSpeed, double maxRotation
+    ) {
+       return targetsForVelocities(Map.of(
+             FORWARD, targetMagnitudes.get(FORWARD) / maxSpeed,
+             STRAFE, targetMagnitudes.get(STRAFE) / maxSpeed,
+             ROTATION, targetMagnitudes.get(ROTATION) / maxRotation
+       ));
     }
 
     /**
@@ -214,10 +227,10 @@ public class SwerveMath {
         Matrix result = pseudoPDotX.multiply(velocities);
 
         return Map.of(
-                VelocityDirection.FORWARD, result.get(0, 1),
-                VelocityDirection.STRAFE, result.get(0, 0),
+                FORWARD, result.get(0, 1),
+                STRAFE, result.get(0, 0),
                 // Unit circle is counter-clockwise, we want clockwise
-                VelocityDirection.ROTATION, -toDegrees(result.get(0, 2))
+                ROTATION, -toDegrees(result.get(0, 2))
         );
     }
 

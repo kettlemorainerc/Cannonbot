@@ -8,7 +8,7 @@ import org.usfirst.frc.team2077.common.sensor.*;
 import java.util.EnumMap;
 import java.util.Map;
 
-public abstract class HardwareRequirements<DriveModule, Chassis extends AbstractChassis<DriveModule>> {
+public abstract class HardwareRequirements<DriveModule, Chassis extends AbstractChassis<? super DriveModule>> {
     private final Subsystem heading;
     private final Subsystem position;
     private final AngleSensor angleSensor;

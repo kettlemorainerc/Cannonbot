@@ -42,10 +42,10 @@ public class SwerveMathTest {
         for(var thing : garbage.toSwerveModuleStates(new ChassisSpeeds(0, 1, toRadians(0)))) {
             System.out.println(thing);
         }
-        System.out.println(garbage.toChassisSpeeds(
-                state(.06, -135), state(.06, 135),
-                state(20, -45), state(.06, 45)
-        ));
+//        System.out.println(garbage.toChassisSpeeds(
+//                state(.06, -135), state(.06, 135),
+//                state(20, -45), state(.06, 45)
+//        ));
 
         var test = math.targetsForVelocities(Map.of(
                 FORWARD, 0.,

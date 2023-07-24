@@ -52,6 +52,14 @@ public class Position extends EnumMap<VelocityDirection, Double> {
         moveAbsolute(distance * Math.cos(direction), distance * Math.sin(direction), rotation);
     }
 
+    public void moveRelative(Map<VelocityDirection, Double> velocities, double changeInTime) {
+        moveRelative(
+              velocities.get(FORWARD) * changeInTime,
+              velocities.get(STRAFE) * changeInTime,
+              velocities.get(ROTATION) * changeInTime
+        );
+    }
+
     public Map<VelocityDirection, Double> distanceAbsolute(Position origin) {
         Map<VelocityDirection, Double> distanceTo = this.clone();
 
@@ -65,9 +73,14 @@ public class Position extends EnumMap<VelocityDirection, Double> {
 
     public Map<VelocityDirection, Double> distanceRelative(Position origin) {
         Map<VelocityDirection, Double> absolute = distanceAbsolute(origin);
+
         double rotation = absolute.get(ROTATION);
-        double distance = Math.sqrt(absolute.get(FORWARD) * absolute.get(FORWARD) + absolute.get(STRAFE) * absolute.get(STRAFE)); // straight line
-        double direction = Math.atan2(absolute.get(STRAFE), absolute.get(FORWARD)) - Math.toRadians(origin.get(ROTATION));
+        double forward = absolute.get(FORWARD);
+        double strafe = absolute.get(STRAFE);
+
+        double distance = Math.sqrt(forward * forward + strafe * strafe);
+
+        double direction = Math.atan2(strafe, forward) - Math.toRadians(origin.get(ROTATION));
         double directionCurve = 0;
 
         if (distance != 0 && rotation != 0) {
@@ -82,8 +95,9 @@ public class Position extends EnumMap<VelocityDirection, Double> {
 
         Map<VelocityDirection, Double> distanceTo = new EnumMap<>(VelocityDirection.class);
 
+        // cos as 0 degrees is forward
         distanceTo.put(FORWARD, distance * Math.cos(directionStraight));
-        distanceTo.put(STRAFE, distance * Math.cos(directionStraight));
+        distanceTo.put(STRAFE, distance * Math.sin(directionStraight));
         distanceTo.put(ROTATION, rotation);
 
         return distanceTo;
