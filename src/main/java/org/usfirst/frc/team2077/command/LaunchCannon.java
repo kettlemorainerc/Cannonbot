@@ -24,9 +24,7 @@ public class LaunchCannon extends SelfDefinedCommand {
     }
 
     @Override public void execute() {
-//        System.out.println("pressed");
         cannon.launch();
-//        finished = !button.getAsBoolean();
     }
 
     @Override public void end(boolean interrupted) {

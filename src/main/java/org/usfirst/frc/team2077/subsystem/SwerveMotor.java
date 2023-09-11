@@ -11,12 +11,16 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.RobotHardware;
+import org.usfirst.frc.team2077.SmartDashValue;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
+
+
 
     public enum MotorPosition{
         FRONT_RIGHT(WheelPosition.FRONT_RIGHT,1, 2, 1,2, 0, 5800),// MAX_RPM: 5800
@@ -53,6 +57,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); //encoder counts multiplied by the gear ratio
     private static final double SPEED_MULTIPLIER = 0.3;
 
+    private static final double DEAD_ZONE = 3;
+
     public static final int MAX_RPM = 5600;
 
     private static final double Pvalue = 0.02;
@@ -76,6 +82,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private static SmartDashNumber smartdashP = new SmartDashNumber("P in PID", 0.0, true);
     private static SmartDashNumber smartdashI = new SmartDashNumber("I in PID", 0.0, true);
+
+    private static SmartDashNumber smartdashfrontLeft = new SmartDashNumber("frony left", 0.0, true );
+    public static boolean stickAtZero = true;
 
     public SwerveMotor(int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel){
         angleKey = "angle_key";
@@ -125,7 +134,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         targetAngle = angle;
         double currentWheelAngle = getWheelAngle();
         double angleDifference = getAngleDifference(currentWheelAngle, targetAngle);
-
+        if(position == MotorPosition.FRONT_RIGHT){
+            smartdashfrontLeft.set(angleDifference);
+        }
         flipMagnitude = false;
         if(Math.abs(angleDifference) > 90){
             targetAngle -= 180;
@@ -163,11 +174,17 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updateMagnitude(){
+        if(stickAtZero && targetMagnitude != 0){
+            return;
+        }
+
         double magnitude = targetMagnitude * SPEED_MULTIPLIER;
 
         if(flipMagnitude) magnitude = -magnitude;
 
         magnitudeMotor.set(magnitude);
+
+
     }
 
     private void updateRotation(){
@@ -237,5 +254,19 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     @Override
     public void resetDistance() {}
+
+    public boolean atTarget(){
+        return Math.abs(getAngleDifference(getWheelAngle(), targetAngle)) < DEAD_ZONE;
+    }
+
+    public static void targetsMet(){
+        for(MotorPosition position : MotorPosition.values()) {
+            SwerveMotor motor = RobotHardware.getInstance().getWheel(position.wheelPosition);
+            if (!motor.atTarget()){
+                return;
+            }
+        }
+        stickAtZero = false;
+    }
 
 }

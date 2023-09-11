@@ -1,89 +1,67 @@
 package org.usfirst.frc.team2077.subsystem;
 
-import com.ctre.phoenix.led.FireAnimation;
-import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj2.command.*;
-
-import java.awt.*;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Cannon extends SubsystemBase {
 
-    public final Relay launchValve;
-    public final Solenoid loadValve;
+    enum ValveState{
+        OPEN,
+        CLOSE;
+    }
 
+    private final Relay launchValve;
+    private final Solenoid loadValve;
     private final PressureSensor pressure;
 
-    private static final Relay.Value OPEN = Relay.Value.kOn;
-    private static final Relay.Value CLOSE = Relay.Value.kOff;
-
-
+    private Runnable task = null;
     private int delay;
-    private Runnable task;
 
-    public Cannon(Solenoid loadValve, Relay launchValve, PressureSensor pressure) {
-        this.launchValve = launchValve;
-        this.loadValve = loadValve;
+    public Cannon(){
+        loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
+        launchValve = new Relay(0, Relay.Direction.kForward);
 
-        this.pressure = pressure;
-        launchValve.set(CLOSE);
+        pressure = new PressureSensor(2);
     }
 
-    public double getCurrentPressure() {return pressure.getCurrentPressure();}
-
-    public boolean isLoadOpen() {return loadValve.get();}
-    public boolean isLaunchOpen() {return launchValve.get() == OPEN;}
-
-    public void closeLaunch() { launchValve.set(CLOSE);}
-    public void closeLoad() { loadValve.set(true);}
-
-    private void openLaunch() {
-        launchValve.set(OPEN);
+    private void setLaunchValve(ValveState state){
+        launchValve.set(state == ValveState.OPEN? Relay.Value.kOn : Relay.Value.kOff);
     }
 
-    private void openLoad() {
-        loadValve.set(false);
+    private void setLoadValve(ValveState state){
+        loadValve.set(!(state == ValveState.OPEN));
     }
 
-    public void load() {
-        openLoad();
-        closeLaunch();
+    private void load(){
+        setLoadValve(ValveState.OPEN);
+        setLaunchValve(ValveState.CLOSE);
     }
 
-    public void launch() {
-        openLaunch();
-        closeLoad();
-
-        schedule( () -> load(), 25);
+    private void release(){
+        setLoadValve(ValveState.CLOSE);
+        setLaunchValve(ValveState.OPEN);
     }
 
-    @Override public void periodic() {
-        if(delay > 0) {
+    public void launch(){
+        release();
+        schedule(this::load, 25);
+    }
+
+    public void schedule(Runnable task, int ticks){
+        this.task = task;
+        this.delay = Math.max(1, ticks);
+    }
+
+    @Override
+    public void periodic() {
+        if(task != null){
             delay--;
-            if(delay == 0 && task != null) {
-                System.out.println("Running task: " + System.currentTimeMillis());
+            if(delay <= 0){
                 task.run();
                 task = null;
-                System.out.println("Ran and cleared task: " + System.currentTimeMillis());
             }
         }
-
-        // TODO: Determine if we want this running and what the target pressure/voltage is
-        // don't test pressure if we're actively launching
-//        if(launchValve.get() == Relay.Value.kOn) return;
-
-//        double pressure = getCurrentPressure();
-//        if(isLoadOpen()) {
-//            if(pressure >= 40) closeLoad();
-//        } else {
-//            if(pressure <= 35) openLoad();
-//        }
-    }
-
-    protected void schedule(
-        Runnable task,
-        int ticks
-    ) {
-        delay = Math.max(1, ticks);
-        this.task = task;
     }
 }

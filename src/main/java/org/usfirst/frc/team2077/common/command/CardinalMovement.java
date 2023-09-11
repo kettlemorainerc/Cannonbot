@@ -7,9 +7,11 @@ package org.usfirst.frc.team2077.common.command;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
+import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.drivetrain.*;
+import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 public class CardinalMovement extends CommandBase {
     public static final double ACCELERATION_G_LIMIT = .4;
@@ -37,6 +39,12 @@ public class CardinalMovement extends CommandBase {
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
         chassis.setVelocityPercent(north, east);
+
+        if(north == 0 && east == 0 && stick.getRotation() == 0){
+            SwerveMotor.stickAtZero = true;
+        }
+        SwerveMotor.targetsMet();
+
     }
 
     @Override public void end(boolean interrupted) {

@@ -79,16 +79,23 @@ public class DriveStation {
         JoystickButton toggleAirCompressor = new JoystickButton(secondary, 6);
 //        JoystickButton calibrateRotation = new JoystickButton(secondary, 3);
 
+
         new BindableRotate(hardware, -1).bind(new JoystickButton(secondary, 9));
         new BindableRotate(hardware, 1).bind(new JoystickButton(secondary, 10));
 
-//        new LoadLauncher(hardware).bind(load);
+//        new LoadLauncher(hardware).bind(loa
+//        d);
 //        new StopLoading(hardware).bind(stopLoad);
         new LaunchCannon(hardware, launch).bind(launch);
         new ToggleAirCompressor(hardware).bind(toggleAirCompressor);
 
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.UP).bind(pistonUp);
         new ChangePistonHeight(hardware, ChangePistonHeight.PistonDirection.DOWN).bind(pistonDown);
+
+//        JoystickButton runHornLow = new JoystickButton(secondary, 22);
+
+        new RunHorn(hardware).bind(new JoystickButton(secondary, 1));
+
 //        new CalibrateRotation(hardware).bind(calibrateRotation);
     }
 

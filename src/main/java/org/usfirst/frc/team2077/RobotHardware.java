@@ -19,7 +19,7 @@ public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChass
     public final Cannon cannon;
     public final AirCompressor airCompressor;
     public final TalonSRX piston = new TalonSRX(9);
-
+    public final Horn horn = new Horn(10);
     public final SwerveMotor northEast = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_RIGHT);
     public final SwerveMotor northWest = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_LEFT);
     public final SwerveMotor southEast = new SwerveMotor(SwerveMotor.MotorPosition.BACK_RIGHT);
@@ -33,11 +33,9 @@ public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChass
 
         airCompressor = new AirCompressor(1);
 
-        // TODO: determine channels
-        Solenoid loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
-        Relay launchValve = new Relay(0, Relay.Direction.kForward);
-        PressureSensor pressure = new PressureSensor(2);
-        cannon = new Cannon(loadValve, launchValve, pressure);
+        cannon = new Cannon();
+
+
     }
 
     @Override public SwerveChassis getChassis() {
