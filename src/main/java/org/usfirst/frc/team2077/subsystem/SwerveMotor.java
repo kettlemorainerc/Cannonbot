@@ -20,21 +20,25 @@ import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
-
-
     public enum MotorPosition{
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT,1, 2, 1,2, 0, 5800),// MAX_RPM: 5800
-        FRONT_LEFT(WheelPosition.FRONT_LEFT,7, 8, 7,8, 11, 5600),// Max: 5600
-        BACK_RIGHT(WheelPosition.BACK_RIGHT,3, 4, 3,4, 12, 5700),// Max: 5700
-        BACK_LEFT(WheelPosition.BACK_LEFT,5, 6, 5,6, 13, 5700);// Max 5700,
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT,  1, 2, 1,2, 0,  5800, 0.042, 0.0029),// MAX_RPM: 5800
+        FRONT_LEFT(WheelPosition.FRONT_LEFT,    7, 8, 7,8, 11, 5600, 0.027, 0.0028),// Max: 5600
+        BACK_RIGHT(WheelPosition.BACK_RIGHT,    3, 4, 3,4, 12, 5700, 0.027, 0.0028),// Max: 5700
+        BACK_LEFT(WheelPosition.BACK_LEFT,      5, 6, 5,6, 13, 5700, 0.027, 0.0028);// Max 5700,
 
         private final WheelPosition wheelPosition;
         private final int directionId, magnitudeId;
         private final int encoderChannelA, encoderChannelB;
         private final int hallEffectChannel;
         private final int maxRPM;
+        private final double p, i;
 
-        MotorPosition(WheelPosition wheelPosition, int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel, int maxRPM){
+        MotorPosition(
+                WheelPosition wheelPosition, int directionId, int magnitudeId,
+                int encoderChannelA, int encoderChannelB,
+                int hallEffectChannel, int maxRPM,
+                double p, double i
+        ){
             this.wheelPosition =  wheelPosition;
             this.directionId = directionId;
             this.magnitudeId = magnitudeId;
@@ -42,6 +46,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             this.encoderChannelB = encoderChannelB;
             this.hallEffectChannel = hallEffectChannel;
             this.maxRPM = maxRPM;
+            this.p = p;
+            this.i = i;
         }
 
         public static MotorPosition of(WheelPosition pos) {
@@ -57,13 +63,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); //encoder counts multiplied by the gear ratio
     private static final double SPEED_MULTIPLIER = 0.3;
 
-    private static final double DEAD_ZONE = 3;
+    private static final double DEAD_ZONE = 5;
 
     public static final int MAX_RPM = 5600;
 
-    private static final double Pvalue = 0.02;
-    private static final double Ivalue = 0.002600;
-    private static final double Dvalue = 0.0;
+//    private static final double Pvalue = 0.02;
+//    private static final double Ivalue = 0.002600;
+//    private static final double Dvalue = 0.0;
 
     private final CANSparkMax magnitudeMotor;
     public final TalonSRX directionMotor;
@@ -86,12 +92,12 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private static SmartDashNumber smartdashfrontLeft = new SmartDashNumber("frony left", 0.0, true );
     public static boolean stickAtZero = true;
 
-    public SwerveMotor(int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel){
+    public SwerveMotor(int directionId, int magnitudeId, int encoderChannelA, int encoderChannelB, int hallEffectChannel, double p, double i){
         angleKey = "angle_key";
 
         directionMotor = new TalonSRX(directionId);
         encoder = new Encoder(encoderChannelA, encoderChannelB);
-        directionPID = new PIDController(Pvalue, Ivalue, Dvalue);
+        directionPID = new PIDController(p, i, 0.0);
         directionPID.setSetpoint(0.0);
 
         smartdashP.onChange(this::updatePID);
@@ -105,11 +111,12 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public SwerveMotor(MotorPosition motorPosition){
-        this(motorPosition.directionId, motorPosition.magnitudeId, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.hallEffectChannel);
+        this(motorPosition.directionId, motorPosition.magnitudeId, motorPosition.encoderChannelA, motorPosition.encoderChannelB, motorPosition.hallEffectChannel, motorPosition.p, motorPosition.i);
         position = motorPosition;
         angleKey = motorPosition.name() + "_Angle";
     }
 
+    //Overrides the PID set for each individual motor, allows for easier PIDing with smartdashboard
     private void updatePID(){
         directionPID.setPID(smartdashP.get(), smartdashI.get(), 0);
     }
@@ -174,9 +181,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updateMagnitude(){
-        if(stickAtZero && targetMagnitude != 0){
-            return;
-        }
+//        if(stickAtZero && targetMagnitude != 0){
+//            return;
+//        }
 
         double magnitude = targetMagnitude * SPEED_MULTIPLIER;
 

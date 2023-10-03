@@ -7,28 +7,27 @@ import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class Horn {
     private final TalonSRX horn;
-    private double maxPercent;
 
-    private int m = 1;
+    private double percent = 0.6;
 
-    private static SmartDashNumber SmartDashMaxHornPercent = new SmartDashNumber("Max Horn Percent", 0.4, true);
+    private static SmartDashNumber SmartDashMaxHornPercent = new SmartDashNumber("Max Horn Percent", 0.6, true);
 
     public Horn(int deviceNumber){
         horn = new TalonSRX(deviceNumber);
 
-        SmartDashMaxHornPercent.onChange(this::updateMaxPercent);
+        SmartDashMaxHornPercent.onChange(this::setRunPercent);
     }
 
-    public void updateMaxPercent(){
-        setMaxPercent(SmartDashMaxHornPercent.get());
-    }
+//    public void updateMaxPercent(){
+//        setRunPercent();
+//    }
 
-    public void setMaxPercent(double percent){
-        maxPercent = percent;
+    public void setRunPercent(){
+        this.percent = SmartDashMaxHornPercent.get();
     }
 
     public void run(){
-        horn.set(TalonSRXControlMode.PercentOutput, maxPercent);
+        horn.set(TalonSRXControlMode.PercentOutput, percent);
     }
 
     public void stop(){

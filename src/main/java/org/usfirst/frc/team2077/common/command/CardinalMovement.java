@@ -13,6 +13,8 @@ import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
+import java.util.Map;
+
 public class CardinalMovement extends CommandBase {
     public static final double ACCELERATION_G_LIMIT = .4;
     public static final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
@@ -39,8 +41,11 @@ public class CardinalMovement extends CommandBase {
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
         chassis.setVelocityPercent(north, east);
+        Map<VelocityDirection, Double> velocity = chassis.getVelocitySet();
 
-        if(north == 0 && east == 0 && stick.getRotation() == 0){
+        double cumulativeVelocity = velocity.values().stream().reduce(0.0, (a, b) -> a + b);
+
+        if(cumulativeVelocity == 0){
             SwerveMotor.stickAtZero = true;
         }
         SwerveMotor.targetsMet();

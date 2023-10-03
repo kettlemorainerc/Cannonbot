@@ -23,7 +23,7 @@ public class Cannon extends SubsystemBase {
         loadValve = new Solenoid(42, PneumaticsModuleType.CTREPCM, 1);
         launchValve = new Relay(0, Relay.Direction.kForward);
 
-        pressure = new PressureSensor(2);
+        pressure = new PressureSensor(0);
     }
 
     private void setLaunchValve(ValveState state){
@@ -46,7 +46,7 @@ public class Cannon extends SubsystemBase {
 
     public void launch(){
         release();
-        schedule(this::load, 25);
+        schedule(this::load, 12);
     }
 
     public void schedule(Runnable task, int ticks){
@@ -56,6 +56,7 @@ public class Cannon extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         if(task != null){
             delay--;
             if(delay <= 0){
