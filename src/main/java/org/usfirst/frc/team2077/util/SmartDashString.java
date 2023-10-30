@@ -8,18 +8,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.*;
 
-public class SmartDashNumber implements SmartDashValue<Double> {
+public class SmartDashString  implements SmartDashValue<String> {
     private static NetworkTable table = NetworkTableInstance.getDefault().getTable("SmartDashboard");
 
     private final NetworkTableEntry entry;
     private List<Runnable> onChange;
-    private Double value;
+    private String value;
     private String key;
 
-    public SmartDashNumber(String key, Double defaultValue, boolean persistent) {
-        if(SmartDashboard.getNumber(key, Double.MIN_VALUE) == Double.MIN_VALUE) {
-            SmartDashboard.putNumber(key, defaultValue);
-        }
+    public SmartDashString(String key, String defaultValue, boolean persistent){
+        SmartDashboard.putString(key, defaultValue);
 
         onChange = new LinkedList<Runnable>();
 
@@ -35,25 +33,29 @@ public class SmartDashNumber implements SmartDashValue<Double> {
                 Kind.kValueAll
         );
         table.addListener(key, events, (networkTable, tableKey, event) -> {
-            this.value = event.valueData.value.getDouble();
+            this.value = event.valueData.value.getString();
 //            System.out.println("Updating " + tableKey + ": " + value);
             onChange.forEach(Runnable::run);
         });
+
     }
 
     public void onChange(Runnable runnable) {
         this.onChange.add(runnable);
     }
 
-    @Override public Double get() {
+    @Override
+    public String get() {
         return value;
     }
 
-    @Override public Optional<Double> getNullable() {
-        return Optional.ofNullable(value);
+    @Override
+    public Optional<String> getNullable() { //TODO: ask david what this means
+        return Optional.empty();
     }
 
-    @Override public void set(Double to) {
-        if(!Objects.equals(to, value)) entry.setN<>umber(to);
+    @Override
+    public void set(String to) {
+        if(!Objects.equals(to, value)) entry.setString(to);
     }
 }

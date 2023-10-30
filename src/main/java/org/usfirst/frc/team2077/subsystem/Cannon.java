@@ -56,7 +56,6 @@ public class Cannon extends SubsystemBase {
 
     @Override
     public void periodic() {
-
         if(task != null){
             delay--;
             if(delay <= 0){

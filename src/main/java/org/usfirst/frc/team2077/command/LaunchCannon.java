@@ -24,7 +24,12 @@ public class LaunchCannon extends SelfDefinedCommand {
     }
 
     @Override public void execute() {
-        cannon.launch();
+        Horn horn = RobotHardware.getInstance().horn;
+
+        if(horn.hasBeenRunningLongEnough()) {
+            cannon.launch();
+            horn.setHornTime(0);
+        }
     }
 
     @Override public void end(boolean interrupted) {

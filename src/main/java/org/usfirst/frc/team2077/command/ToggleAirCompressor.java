@@ -24,11 +24,7 @@ public class ToggleAirCompressor extends SelfDefinedCommand {
 
         System.out.println("Button is pressed");
 
-        if(airCompressor.isOn()){
-            airCompressor.turnOff();
-        }else{
-            airCompressor.turnOn();
-        }
+        airCompressor.toggleDesired();
 
         finished = true;
 
